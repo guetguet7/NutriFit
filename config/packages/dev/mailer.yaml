@@ -1,0 +1,4 @@
+framework:
+    mailer:
+        # En dev, envoi synchrone pour éviter la file Messenger
+        message_bus: null

@@ -1,0 +1,55 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <section class="page-panel">
+        <header class="panel-header--split">
+            <div>
+                <h1 class="panel-title">Inscription</h1>
+                <p class="panel-subtitle">Créez votre compte pour suivre vos repas et activités.</p>
+            </div>
+        </header>
+
+        {% for flash_error in app.flashes('verify_email_error') %}
+            <div class="flash flash--error" role="alert">{{ flash_error }}</div>
+        {% endfor %}
+
+        {{ form_errors(registrationForm) }}
+
+        {{ form_start(registrationForm, {'attr': {'class': 'form-section'}}) }}
+            <section class="form-card">
+                <h2 class="form-title">Informations de compte</h2>
+                <div class="stack">
+                    <div class="form-field">
+                        {{ form_label(registrationForm.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(registrationForm.email, {'attr': {'class': 'form-input', 'placeholder': 'nom@exemple.com'}}) }}
+                        {{ form_errors(registrationForm.email) }}
+                    </div>
+                    <div class="form-field">
+                        {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-input'}}) }}
+                        {{ form_errors(registrationForm.plainPassword) }}
+                    </div>
+                    <div class="form-field">
+                        <label class="inline-choice">
+                            {{ form_widget(registrationForm.agreeTerms) }}
+                            <span>J'accepte les conditions d'utilisation</span>
+                        </label>
+                        {{ form_errors(registrationForm.agreeTerms) }}
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn--primary">Créer mon compte</button>
+                    <a class="btn btn--ghost" href="{{ path('home') }}">Retour accueil</a>
+                </div>
+            </section>
+            <p class="form-helper form-helper--spaced">
+                Vous avez déjà un compte ? Veuillez vous
+                <a href="{{ path('app_login') }}">connecter</a>.
+            </p>
+        {{ form_end(registrationForm) }}
+    </section>
+</div>
+{% endblock %}

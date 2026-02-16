@@ -1,0 +1,75 @@
+{% extends 'layout.html.twig' %}
+{% block title %}Modifier un repas - NutriFit{% endblock %}
+
+{% block content %}
+	<div class="page-section">
+		<section class="page-panel">
+			<header class="panel-header--split">
+				<div>
+					<h1 class="panel-title">Modifier un repas</h1>
+					<p class="panel-subtitle">Mettez à jour la date, le type et la note.</p>
+				</div>
+				<a class="btn btn--ghost" href="{{ path('repas') }}">Retour</a>
+			</header>
+
+			<form method="post" class="form-section">
+				<section class="form-card">
+					<h2 class="form-title">Infos générales</h2>
+					<div class="grid grid--form">
+						<div class="form-field">
+							<label for="meal-date" class="form-label">Date / heure</label>
+							<input id="meal-date" name="dateRepas" type="datetime-local" class="form-input" value="{{ repas.dateRepas ? repas.dateRepas|date('Y-m-d\\TH:i') : '' }}">
+						</div>
+						<div class="form-field">
+							<label for="meal-type" class="form-label">Type de repas</label>
+							<select id="meal-type" name="typeRepas" class="form-select">
+								<option value="petit_dej" {% if repas.typeRepas == 'petit_dej' %} selected {% endif %}>Petit-dej</option>
+								<option value="dejeuner" {% if repas.typeRepas == 'dejeuner' %} selected {% endif %}>Déjeuner</option>
+								<option value="diner" {% if repas.typeRepas == 'diner' %} selected {% endif %}>Dîner</option>
+								<option value="collation" {% if repas.typeRepas == 'collation' %} selected {% endif %}>Collation</option>
+							</select>
+						</div>
+						<div class="form-field">
+							<label for="meal-note" class="form-label">Note (optionnel)</label>
+							<input id="meal-note" name="note" type="text" placeholder="Ex: repas cheat, restaurant..." class="form-input" value="{{ repas.notes }}">
+						</div>
+					</div>
+				</section>
+
+				<section class="form-card">
+					<h2 class="form-title">Recettes sélectionnées</h2>
+					{% if repas.elementsRepas is not empty %}
+						<div class="stack">
+							{% for element in repas.elementsRepas %}
+								<div class="list-row">
+									<div>
+										<p class="list-row__title">{{ element.recette ? element.recette.titre : element.libelle }}</p>
+										<small class="table-meta">{{ element.calories }}
+											kcal •
+											{{ element.quantite }}
+											{{ element.unite }}</small>
+									</div>
+								</div>
+							{% endfor %}
+						</div>
+					{% else %}
+						<p class="empty-state">Aucun élément associé.</p>
+					{% endif %}
+				</section>
+
+				<section class="form-summary">
+					<div>
+						<p class="form-summary__label">Total calories</p>
+						<h2 class="form-summary__value">{{ repas.totalCalories }}
+							kcal</h2>
+					</div>
+					<div class="form-actions">
+						<input type="hidden" name="_token" value="{{ csrf_token('edit_repas_' ~ repas.id) }}">
+						<button class="btn btn--primary" type="submit">Enregistrer</button>
+						<a class="btn btn--ghost" href="{{ path('repas') }}">Annuler</a>
+					</div>
+				</section>
+			</form>
+		</section>
+	</div>
+{% endblock %}

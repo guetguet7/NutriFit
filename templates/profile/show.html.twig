@@ -1,0 +1,75 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Mon compte{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <section class="page-panel">
+        <header class="panel-header--split">
+            <div>
+                <h1 class="panel-title">Mon compte</h1>
+                <p class="panel-subtitle">Gérez vos informations personnelles et vos objectifs.</p>
+            </div>
+            <a class="btn btn--primary" href="{{ path('profile_edit') }}">Modifier</a>
+        </header>
+
+        <section class="grid grid--cards section-block">
+            <article class="card">
+                <h2 class="card-title">Informations du compte</h2>
+                <div class="stack">
+                    <div class="form-field">
+                        <label for="profile-pseudo" class="form-label">Pseudo</label>
+                        <input id="profile-pseudo" type="text" value="{% if profil.pseudo is not empty %}{{ profil.pseudo }}{% else %}Non renseigné{% endif %}" disabled class="form-input form-input--disabled">
+                    </div>
+                    <div class="form-field">
+                        <label for="profile-email" class="form-label">E-mail</label>
+                        <input id="profile-email" type="text" value="{{ user.email }}" disabled class="form-input form-input--disabled">
+                    </div>
+                    <div class="form-field">
+                        <label for="profile-verified" class="form-label">Compte vérifié</label>
+                        <input id="profile-verified" type="text" value="{{ user.isVerified ? 'Oui' : 'Non' }}" disabled class="form-input form-input--disabled">
+                    </div>
+                </div>
+            </article>
+
+            <article class="card">
+                <h2 class="card-title">Profil et objectifs</h2>
+                <div class="grid grid--two">
+                    <div class="form-field">
+                        <label for="profile-gender" class="form-label">Sexe</label>
+                        <input id="profile-gender" type="text" value="{{ profil.sexe }}" disabled class="form-input form-input--disabled">
+                    </div>
+                    <div class="form-field">
+                        <label for="profile-age" class="form-label">Âge</label>
+                        <input id="profile-age" type="text" value="{{ profil.age }} ans" disabled class="form-input form-input--disabled">
+                    </div>
+                    <div class="form-field">
+                        <label for="profile-height" class="form-label">Taille</label>
+                        <input id="profile-height" type="text" value="{{ profil.tailleCm }} cm" disabled class="form-input form-input--disabled">
+                    </div>
+                    <div class="form-field">
+                        <label for="profile-weight" class="form-label">Poids</label>
+                        <input id="profile-weight" type="text" value="{{ profil.poidsKg|number_format(2, '.', ' ') }} kg" disabled class="form-input form-input--disabled">
+                    </div>
+                    <div class="form-field">
+                        <label for="profile-activity" class="form-label">Niveau d'activité</label>
+                        <input id="profile-activity" type="text" value="{{ profil.niveauActivite }}" disabled class="form-input form-input--disabled">
+                    </div>
+                    <div class="form-field">
+                        <label for="profile-goal" class="form-label">Objectif</label>
+                        <input id="profile-goal" type="text" value="{{ profil.objectifType }}" disabled class="form-input form-input--disabled">
+                    </div>
+                    <div class="form-field">
+                        <label for="profile-target-weight" class="form-label">Poids cible</label>
+                        <input id="profile-target-weight" type="text" value="{% if profil.poidsCibleKg is not null %}{{ profil.poidsCibleKg|number_format(2, '.', ' ') }} kg{% else %}Non renseigné{% endif %}" disabled class="form-input form-input--disabled">
+                    </div>
+                    <div class="form-field">
+                        <label for="profile-pace" class="form-label">Rythme de perte</label>
+                        <input id="profile-pace" type="text" value="{% if profil.rythmePerteKgSemaine is not null %}{{ profil.rythmePerteKgSemaine|number_format(2, '.', ' ') }} kg/semaine{% else %}Non renseigné{% endif %}" disabled class="form-input form-input--disabled">
+                    </div>
+                </div>
+            </article>
+        </section>
+    </section>
+</div>
+{% endblock %}

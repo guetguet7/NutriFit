@@ -1,0 +1,140 @@
+/* Layout: page sections */
+.page-section {
+    padding: 1.5rem 1rem;
+}
+
+.page-panel {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, var(--surface-soft) 0%, var(--bg) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 1.5rem 1.5rem 2rem;
+    box-shadow: var(--shadow-card);
+}
+
+.panel-header {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 260px));
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+
+    &--split {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+}
+
+.panel-title {
+    margin: 0 0 0.35rem;
+}
+
+.panel-subtitle {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.panel-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.8rem;
+}
+
+.panel-illustration {
+    background: radial-gradient(circle at 20% 20%, var(--surface-soft) 0%, var(--bg) 55%, var(--surface) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &__text {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+}
+
+/* Layout: grids et piles */
+.grid {
+    display: grid;
+    gap: 1rem;
+
+    &--stats {
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        margin-top: 1.25rem;
+    }
+
+    &--summary {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-top: 1.25rem;
+    }
+
+    &--cards {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        margin-top: 1.25rem;
+    }
+
+    &--form {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.75rem;
+    }
+
+    &--form-wide {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1rem;
+    }
+
+    &--form-small {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
+    }
+
+    &--form-3 {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+
+    &--two {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    &--bars {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+    }
+
+    &--chart {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.35rem;
+        align-items: end;
+        height: 160px;
+        margin-top: 0.75rem;
+    }
+}
+
+.stack {
+    display: grid;
+    gap: 0.75rem;
+
+    &--sm {
+        gap: 0.6rem;
+    }
+
+    &--md {
+        gap: 1rem;
+    }
+
+    &--lg {
+        gap: 1.5rem;
+    }
+}

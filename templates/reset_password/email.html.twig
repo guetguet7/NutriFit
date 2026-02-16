@@ -1,0 +1,10 @@
+<h1>Bonjour !</h1>
+
+<p>Veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe :</p>
+
+{% set reset_url = absolute_url(path('app_reset_password', { token: resetToken.token })) %}
+<p><a href="{{ reset_url }}">{{ reset_url }}</a></p>
+<p>Si le lien ne s'ouvre pas, copiez ce token : <strong>{{ resetToken.token }}</strong></p>
+
+<p>Ce lien expirera dans {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
+<p>Cheers!</p>

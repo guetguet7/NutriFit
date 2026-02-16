@@ -1,0 +1,102 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Profil utilisateur{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <section class="page-panel">
+        <header class="panel-header--split">
+            <div>
+                <h1 class="panel-title">Profil utilisateur</h1>
+                <p class="panel-subtitle">Mettez à jour vos informations et objectifs.</p>
+            </div>
+            <a class="btn btn--ghost" href="{{ path('profile') }}">Retour</a>
+        </header>
+
+        {{ form_start(form, {'attr': {'class': 'form-section'}}) }}
+        <div class="grid grid--cards section-block">
+            <article class="card">
+                <h2 class="card-title">Informations personnelles</h2>
+                <div class="stack">
+                    <div class="form-field">
+                        {{ form_label(form.sexe, 'Sexe', {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="chip-row">
+                            {% for choice in form.sexe %}
+                                <label class="choice-chip">
+                                    {{ form_widget(choice, {'attr': {'class': 'choice-input'}}) }}
+                                    <span class="choice-chip__pill">{{ choice.vars.label }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {{ form_errors(form.sexe) }}
+                    </div>
+                    <div class="form-field">
+                        {{ form_label(form.pseudo, 'Pseudo', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.pseudo, {'attr': {'class': 'form-input'}}) }}
+                        {{ form_errors(form.pseudo) }}
+                    </div>
+                    <div class="form-field">
+                        {{ form_label(form.age, 'Âge', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.age, {'attr': {'class': 'form-input', 'min': 1}}) }}
+                        {{ form_errors(form.age) }}
+                    </div>
+                    <div class="form-field">
+                        {{ form_label(form.tailleCm, 'Taille (cm)', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.tailleCm, {'attr': {'class': 'form-input', 'min': 1}}) }}
+                        {{ form_errors(form.tailleCm) }}
+                    </div>
+                    <div class="form-field">
+                        {{ form_label(form.poidsKg, 'Poids (kg)', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.poidsKg, {'attr': {'class': 'form-input', 'min': 1, 'step': '0.1'}}) }}
+                        {{ form_errors(form.poidsKg) }}
+                    </div>
+                </div>
+            </article>
+
+            <article class="card">
+                <h2 class="card-title">Objectifs</h2>
+                <div class="stack">
+                    <div class="form-field">
+                        {{ form_label(form.niveauActivite, 'Niveau d\'activité', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.niveauActivite, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.niveauActivite) }}
+                    </div>
+                    <div class="form-field">
+                        {{ form_label(form.objectifType, 'Objectif', {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="chip-row">
+                            {% for choice in form.objectifType %}
+                                <label class="choice-chip">
+                                    {{ form_widget(choice, {'attr': {'class': 'choice-input'}}) }}
+                                    <span class="choice-chip__pill">{{ choice.vars.label }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {{ form_errors(form.objectifType) }}
+                    </div>
+                    <div class="form-field">
+                        {{ form_label(form.poidsCibleKg, 'Poids cible (kg)', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.poidsCibleKg, {'attr': {'class': 'form-input', 'min': 0, 'step': '0.1'}}) }}
+                        {{ form_errors(form.poidsCibleKg) }}
+                    </div>
+                    <div class="form-field">
+                        {{ form_label(form.rythmePerteKgSemaine, 'Rythme de perte (kg/semaine)', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.rythmePerteKgSemaine, {'attr': {'class': 'form-input', 'min': 0, 'step': '0.1'}}) }}
+                        <p class="form-helper">Optionnel, utile pour la perte de poids.</p>
+                        {{ form_errors(form.rythmePerteKgSemaine) }}
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        {% if form._token is defined %}
+            {{ form_widget(form._token) }}
+        {% endif %}
+
+        <div class="form-actions section-block--sm">
+            <button class="btn btn--primary" type="submit">Enregistrer</button>
+            <a class="btn btn--ghost" href="{{ path('profile') }}">Annuler</a>
+        </div>
+        {{ form_end(form, {'render_rest': false}) }}
+    </section>
+</div>
+{% endblock %}

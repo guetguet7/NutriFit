@@ -1,0 +1,18 @@
+{% extends "base.html.twig" %}
+
+{% block stylesheets %}
+ <link rel="stylesheet" href="{{ asset('styles/main.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="page-shell">
+    {{ include('partials/_banner.html.twig') }}
+    {{ include('partials/_flash.modal.html.twig') }}
+
+    <main class="page-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {{ include('partials/_footer.html.twig') }}
+</div>
+{% endblock %}

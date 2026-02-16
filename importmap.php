@@ -13,7 +13,7 @@
  */
 return [
     'app' => [
-        'path' => './assets/app.js',
+        'path' => './assets/js/app.js',
         'entrypoint' => true,
     ],
     '@hotwired/stimulus' => [
@@ -24,5 +24,14 @@ return [
     ],
     '@hotwired/turbo' => [
         'version' => '7.3.0',
+    ],
+    'chart.js' => [
+        'version' => '4.5.1',
+    ],
+    '@kurkle/color' => [
+        'version' => '0.3.4',
+    ],
+    'chart.js/auto' => [
+        'version' => '4.5.1',
     ],
 ];

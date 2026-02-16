@@ -1,0 +1,34 @@
+{% extends 'layout.html.twig' %}
+{% block title %}Recette - NutriFit{% endblock %}
+
+{% block content %}
+	<div class="page-section">
+		<section class="page-panel">
+			<header class="panel-header--split">
+				<div>
+					<h1 class="panel-title">{{ recette.titre }}</h1>
+					<p class="panel-subtitle">Recette détaillée depuis Spoonacular.</p>
+				</div>
+				<a class="btn btn--ghost" href="{{ path('repas', { period: backPeriod }) }}">Retour</a>
+			</header>
+
+			<section class="form-card">
+				<h2 class="form-title">Résumé</h2>
+				{% if summary %}
+					<p class="panel-subtitle">{{ summary }}</p>
+				{% else %}
+					<p class="empty-state">Aucun résumé disponible.</p>
+				{% endif %}
+			</section>
+
+			<section class="form-card">
+				<h2 class="form-title">Instructions</h2>
+				{% if instructions %}
+					<div class="panel-subtitle" style="white-space: pre-line;">{{ instructions }}</div>
+				{% else %}
+					<p class="empty-state">Aucune instruction disponible.</p>
+				{% endif %}
+			</section>
+		</section>
+	</div>
+{% endblock %}

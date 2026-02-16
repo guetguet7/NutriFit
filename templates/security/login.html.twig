@@ -1,0 +1,51 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Se connecter{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <section class="page-panel">
+        <form method="post" class="form-card">
+            {% if error %}
+                <div class="flash flash--error" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
+
+            <h1 class="form-title">Veuillez vous connecter</h1>
+            <div class="stack">
+                <div class="form-field">
+                    <label for="username" class="form-label">Email</label>
+                    <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-input" autocomplete="email" required autofocus>
+                </div>
+                <div class="form-field">
+                    <label for="password" class="form-label">Mot de passe</label>
+                    <input type="password" name="_password" id="password" class="form-input" autocomplete="current-password" required>
+                </div>
+            </div>
+            <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+            {#
+                Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
+                See https://symfony.com/doc/current/security/remember_me.html
+
+                <div class="checkbox mb-3">
+                    <input type="checkbox" name="_remember_me" id="_remember_me">
+                    <label for="_remember_me">Remember me</label>
+                </div>
+            #}
+
+            <div class="form-actions">
+                <button class="btn btn--primary" type="submit">
+                    Se connecter
+                </button>
+            </div>
+            <p class="form-helper form-helper--spaced">
+                Si vous n'avez pas de compte, veuillez vous
+                <a href="{{ path('app_register') }}">inscrire</a>.
+            </p>
+            <p class="form-helper">
+                <a href="{{ path('app_forgot_password_request') }}">Mot de passe oublié ?</a>
+            </p>
+        </form>
+    </section>
+</div>
+{% endblock %}

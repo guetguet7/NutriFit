@@ -1,0 +1,145 @@
+{% extends 'layout.html.twig' %}
+{% block title %}Activités - NutriFit
+{% endblock %}
+
+{% block content %}
+	<div class="page-section">
+		<section class="page-panel">
+			<header class="panel-header">
+				<div>
+					<h1 class="panel-title">Mes activités</h1>
+					<p class="panel-subtitle">
+						Objectif : enregistrer vos activités et les calories brûlées.
+					</p>
+					<div class="panel-actions">
+						<a class="btn btn--primary" href="{{ path('activite_new') }}">Ajouter une activité</a>
+					</div>
+				</div>
+				<div class="panel-illustration">
+					<img src="{{ asset('img/illustration_activite.webp') }}" alt="Illustration activité sportive">
+				</div>
+			</header>
+
+			<div class="grid grid--summary">
+				<article class="card card--compact">
+					<p class="stat-label">Total calories brûlées aujourd'hui</p>
+					<h2 class="stat-value">{{ totalBurnedToday|default(0) }}
+						kcal</h2>
+				</article>
+				<article class="card card--compact">
+					<p class="stat-label">Temps total cette semaine</p>
+					<h2 class="stat-value">{{ totalMinutesWeek|default(0) }}
+						min</h2>
+				</article>
+				<article class="card card--compact">
+					<p class="stat-label">Activité favorite</p>
+					<h2 class="stat-value">{{ topActivity|default('Aucune') }}</h2>
+					<p class="stat-meta">{{ topActivityCount|default(0) }}x</p>
+				</article>
+			</div>
+
+			<div class="card card--list section-block">
+				<div class="chip-row">
+					<a class="chip{% if period == 'day' %} chip--active{% endif %}" href="{{ path('activite', { period: 'day' }) }}">Auj.</a>
+					<a class="chip{% if period == 'week' %} chip--active{% endif %}" href="{{ path('activite', { period: 'week' }) }}">Semaine</a>
+					<a class="chip{% if period == 'month' %} chip--active{% endif %}" href="{{ path('activite', { period: 'month' }) }}">Mois</a>
+					<a class="chip{% if period == 'all' %} chip--active{% endif %}" href="{{ path('activite', { period: 'all' }) }}">Tous</a>
+				</div>
+
+				<div class="section-block--sm">
+					{% if activityGroups is empty %}
+						<p class="empty-state">Aucune activité enregistrée.</p>
+					{% else %}
+						{% for group in activityGroups %}
+							<div class="section-block--sm">
+								<h3 class="section-title">{{ group.label }}</h3>
+								<div class="table-wrap">
+									<table class="data-table">
+										<thead>
+											<tr>
+												<th>Type</th>
+												<th>Calories</th>
+												<th>Date et heure</th>
+												<th>Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for activity in group.activities %}
+												<tr>
+													<td>
+														<div class="list-row__left">
+															<div class="table-avatar">
+																{{ activity.type|slice(0,1)|upper }}
+															</div>
+															<div>
+																<p class="list-row__title">{{ activity.type }}</p>
+																<small class="table-meta">{{ activity.dureeMin }}
+																	min</small>
+															</div>
+														</div>
+													</td>
+													<td>
+														{{ activity.caloriesBrulees }}
+														kcal
+													</td>
+													<td>
+														{{ activity.dateActivite|date('d/m H:i') }}
+													</td>
+													<td>
+														<div class="table-actions">
+															<a class="btn btn--ghost" href="{{ path('activite_edit', { id: activity.id }) }}" aria-label="Modifier">✏️</a>
+															<form method="post" action="{{ path('activite_delete', { id: activity.id }) }}" onsubmit="return confirm('Supprimer cette activité ?');">
+																<input type="hidden" name="_token" value="{{ csrf_token('delete_activite_' ~ activity.id) }}">
+																<button class="btn btn--ghost" type="submit" aria-label="Supprimer">🗑️</button>
+															</form>
+														</div>
+													</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						{% endfor %}
+					{% endif %}
+				</div>
+			</div>
+
+			<div class="grid grid--cards">
+				<article class="card">
+					<h3 class="card-title card-title--sm">Statistiques</h3>
+					<p class="stat-label">Temps d'activité</p>
+					{% if topActivities is defined and topActivities %}
+						<div class="grid--bars">
+							{% for item in topActivities %}
+								<div class="stat-row">
+									<span>{{ item.type }}</span>
+									<span>{{ item.percent }}%</span>
+								</div>
+								<div class="stat-track">
+									<div class="stat-bar" style="width: {{ item.percent }}%;"></div>
+								</div>
+							{% endfor %}
+						</div>
+					{% else %}
+						<p class="stat-label">Aucune activité.</p>
+					{% endif %}
+				</article>
+
+				<article class="card">
+					<div class="card-header">
+						<h3 class="card-title">Cette semaine</h3>
+						<span class="section-note">Evolutions</span>
+					</div>
+					<div class="chart-canvas-wrap">
+						<canvas class="chart-canvas" data-chart data-chart-type="line" data-dataset-label="Calories brûlées" data-labels='{{ activityChart.labels|default([])|json_encode }}' data-values='{{ activityChart.values|default([])|json_encode }}'></canvas>
+					</div>
+				</article>
+			</div>
+
+			<div class="section-center">
+				<a class="btn btn--primary" href="{{ path('activite_new') }}">Ajouter une activité</a>
+			</div>
+		</section>
+	</div>
+{% endblock %}

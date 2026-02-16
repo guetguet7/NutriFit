@@ -1,0 +1,40 @@
+<footer class="site-footer">
+    <div class="site-footer__inner">
+        <div class="site-footer__grid">
+            <div class="site-footer__column">
+                <p class="site-footer__title">Projet</p>
+                <div class="site-footer__project">
+                    <span class="site-footer__brand">NutriFit</span>
+                    <p class="site-footer__text">Suivi nutrition &amp; activités sportives</p>
+                </div>
+            </div>
+            <div class="site-footer__column">
+                <p class="site-footer__title">Navigation</p>
+                <ul class="site-footer__links">
+                    <li><a class="site-footer__link" href="{{ path('home') }}">Accueil</a></li>
+                    <li><a class="site-footer__link" href="{{ path('dashboard_show') }}">Dashboard</a></li>
+                    <li><a class="site-footer__link" href="{{ path('repas') }}">Repas</a></li>
+                    <li><a class="site-footer__link" href="{{ path('activite') }}">Activités</a></li>
+                    <li><a class="site-footer__link" href="{{ path('profile_edit') }}">Objectif</a></li>
+                    <li><a class="site-footer__link" href="{{ path('profile') }}">Profil</a></li>
+                </ul>
+            </div>
+            <div class="site-footer__column">
+                <p class="site-footer__title">Ressources</p>
+                <ul class="site-footer__links">
+                    <li><span class="site-footer__text">Mentions légales</span></li>
+                    <li><span class="site-footer__text">Confidentialité</span></li>
+                    <li><a class="site-footer__link" href="{{ path('app_contact') }}">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="site-footer__bar">
+            <div class="site-footer__meta">
+                <span>© 2026 NutriFit — v1.0</span>
+                <span class="site-footer__dot">•</span>
+                <span>Recettes : Spoonacular API</span>
+            </div>
+            <a class="site-footer__to-top" href="#top" aria-label="Retour en haut">⬆ Retour en haut</a>
+        </div>
+    </div>
+</footer>

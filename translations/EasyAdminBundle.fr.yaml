@@ -1,0 +1,30 @@
+user:
+  logged_in_as: "Connecté en tant que"
+  anonymous: "Anonyme"
+
+action:
+  search: "Rechercher"
+  entity_actions: "Actions"
+  new: "Ajouter"
+  edit: "Modifier"
+  delete: "Supprimer"
+  save: "Enregistrer"
+  detail: "Détails"
+  index: "Liste"
+  back_to_index: "Retour à la liste"
+
+datagrid:
+  no_results: "Aucun résultat"
+  hidden_results: "Résultats masqués"
+
+filter:
+  title: "Filtres"
+
+settings:
+  locale: "Langue"
+  appearance:
+    label: "Apparence"
+    light: "Clair"
+    dark: "Sombre"
+    auto: "Automatique"
+

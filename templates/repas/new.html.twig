@@ -1,0 +1,193 @@
+{% extends 'layout.html.twig' %}
+{% block title %}Ajouter un repas - NutriFit
+{% endblock %}
+
+{% block content %}
+	{% set currentMode = app.request.request.get('modeAjout', 'api') %}
+	{% if currentMode not in ['api', 'manual'] %}
+		{% set currentMode = 'api' %}
+	{% endif %}
+	{% set currentMealType = app.request.request.get('typeRepas', selectedMealType ?? app.request.query.get('type', 'dejeuner')) %}
+	{% if currentMealType not in ['petit_dej', 'dejeuner', 'diner', 'collation'] %}
+		{% set currentMealType = 'dejeuner' %}
+	{% endif %}
+	<div class="page-section">
+		<section class="page-panel">
+			<header class="panel-header--split">
+				<div>
+					<h1 class="panel-title">Ajouter un repas</h1>
+					<p class="panel-subtitle">Ajout rapide via API ou saisie manuelle.</p>
+				</div>
+				<a class="btn btn--ghost" href="{{ path('repas') }}">Retour</a>
+			</header>
+
+			<section class="form-card">
+				<h2 class="form-title">Infos générales</h2>
+				<div class="grid grid--form">
+					<div class="form-field">
+						<label for="meal-date" class="form-label">Date / heure</label>
+						<input id="meal-date" name="dateRepas" type="datetime-local" value="{{ mealDateValue|default('now'|date('Y-m-d\\TH:i')) }}" class="form-input" form="meal-save-form">
+					</div>
+					<div class="form-field">
+						<label for="meal-type" class="form-label">Type de repas</label>
+						<select id="meal-type" name="typeRepas" class="form-select" form="meal-save-form">
+							<option value="petit_dej" {% if currentMealType == 'petit_dej' %} selected {% endif %}>Petit-déjeuner</option>
+							<option value="dejeuner" {% if currentMealType == 'dejeuner' %} selected {% endif %}>Déjeuner</option>
+							<option value="diner" {% if currentMealType == 'diner' %} selected {% endif %}>Dîner</option>
+							<option value="collation" {% if currentMealType == 'collation' %} selected {% endif %}>Collation</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="meal-note" class="form-label">Note (optionnel)</label>
+						<input id="meal-note" name="note" type="text" placeholder="Ex: repas cheat, restaurant..." class="form-input" form="meal-save-form">
+					</div>
+				</div>
+			</section>
+
+			<section class="form-card" data-meal-mode-switch>
+				<h2 class="form-title">Mode d'ajout</h2>
+				<div class="panel-actions">
+					<label class="inline-choice">
+						<input type="radio" name="modeAjout" value="api" {% if currentMode == 'api' %} checked {% endif %} form="meal-save-form">
+						<span>API</span>
+					</label>
+					<label class="inline-choice">
+						<input type="radio" name="modeAjout" value="manual" {% if currentMode == 'manual' %} checked {% endif %} form="meal-save-form">
+						<span>Manuel</span>
+					</label>
+				</div>
+			</section>
+
+			<section class="grid grid--form-wide">
+				<article class="form-card" data-meal-mode-panel="api" {% if currentMode != 'api' %} hidden {% endif %}>
+					<h2 class="form-title">Ajout via Spoonacular</h2>
+					{% if selectedRecipes is empty %}
+						<div class="search-row" data-recipe-search data-api-url="{{ path('api_recipes') }}" data-min-calories="{{ minCalories }}" data-max-calories="{{ maxCalories }}" data-select-base="{{ path('repas_new') }}">
+							<input name="search" type="text" value="{{ searchQuery }}" placeholder="Rechercher une recette (pasta, salade...)" class="form-input form-input--grow" data-recipe-input>
+							<button class="btn btn--ghost" type="button" data-recipe-submit>Rechercher</button>
+						</div>
+
+						<div class="recipe-grid" data-recipe-results>
+							{% if spoonacularResults is defined and spoonacularResults %}
+								{% for item in spoonacularResults %}
+									<div class="recipe-card">
+										<div class="recipe-card__header">
+											<div class="recipe-thumb">
+												{% if item.image is defined %}
+													<img src="{{ item.image }}" alt="{{ item.title|default('Recette') }}">
+												{% endif %}
+											</div>
+											<div class="recipe-card__body">
+												<p class="recipe-card__title">{{ item.title|default('Recette') }}</p>
+												<small class="recipe-card__meta">
+													{{ item.calories|default(0) }}
+													kcal •
+													{{ item.servings|default(1) }}
+													servings
+												</small>
+											</div>
+										</div>
+										<div class="recipe-card__actions">
+											{% if item.id is defined and item.id %}
+												<a class="btn btn--ghost" href="{{ path('repas_new', { search: searchQuery, selectRecipe: item.id, type: currentMealType }) }}">Sélectionner</a>
+											{% else %}
+												<button class="btn btn--ghost" type="button" disabled>Sélectionner</button>
+											{% endif %}
+										</div>
+									</div>
+								{% endfor %}
+							{% else %}
+								<p class="empty-state">Aucun résultat.</p>
+							{% endif %}
+						</div>
+					{% else %}
+						<p class="form-helper">Une recette est déjà sélectionnée. Retirez-la pour en choisir une autre.</p>
+					{% endif %}
+
+					<div class="recipe-selected">
+						<h3 class="card-title card-title--sm">Recette sélectionnée</h3>
+						{% if selectedRecipes is defined and selectedRecipes %}
+							{% for recipe in selectedRecipes %}
+								<div class="recipe-selected__card" data-selected-recipe data-calories-per-serving="{{ recipe.calories|default(0) }}">
+									<div>
+										<p class="recipe-card__title">{{ recipe.title }}</p>
+										<small class="recipe-card__meta">
+											{{ recipe.calories|default(0) }}
+											kcal •
+											{{ recipe.servings|default(1) }}
+											servings
+										</small>
+									</div>
+									<div class="form-field">
+										<label class="form-label" for="recipe-qty-{{ recipe.id }}">Quantité</label>
+										<input id="recipe-qty-{{ recipe.id }}" name="selectedQty[{{ recipe.id }}]" type="number" min="0.25" step="0.25" value="{{ recipe.qty|default(1) }}" class="form-input" form="meal-save-form" data-recipe-qty-input>
+									</div>
+									<a class="btn btn--ghost" href="{{ path('repas_new', { search: searchQuery, removeRecipe: recipe.id, type: currentMealType }) }}">Retirer</a>
+								</div>
+							{% endfor %}
+						{% else %}
+							<p class="empty-state">Aucune recette sélectionnée.</p>
+						{% endif %}
+					</div>
+				</article>
+
+				<article class="form-card" data-meal-mode-panel="manual" {% if currentMode != 'manual' %} hidden {% endif %}>
+					<h2 class="form-title">Ajout manuel</h2>
+					<div class="stack">
+						<div class="form-field">
+							<label for="manual-name" class="form-label">Nom du plat</label>
+							<input id="manual-name" name="manualName" type="text" class="form-input" form="meal-save-form">
+						</div>
+						<div class="form-field">
+							<label for="manual-calories" class="form-label">Calories</label>
+							<input id="manual-calories" name="manualCalories" type="number" min="0" step="1" class="form-input" form="meal-save-form">
+						</div>
+						<div class="grid grid--form-3">
+							<div class="form-field">
+								<label for="manual-prot" class="form-label">Protéines</label>
+								<input id="manual-prot" name="manualProtein" type="number" min="0" step="1" class="form-input form-input--sm" form="meal-save-form">
+							</div>
+							<div class="form-field">
+								<label for="manual-carbs" class="form-label">Glucides</label>
+								<input id="manual-carbs" name="manualCarbs" type="number" min="0" step="1" class="form-input form-input--sm" form="meal-save-form">
+							</div>
+							<div class="form-field">
+								<label for="manual-fat" class="form-label">Lipides</label>
+								<input id="manual-fat" name="manualFat" type="number" min="0" step="1" class="form-input form-input--sm" form="meal-save-form">
+							</div>
+						</div>
+						<div class="form-field">
+							<label for="manual-qty" class="form-label">Quantité (portions)</label>
+							<input id="manual-qty" name="manualQty" type="number" min="0.25" step="0.25" value="1" class="form-input" form="meal-save-form">
+						</div>
+					</div>
+				</article>
+			</section>
+
+				<section class="form-summary">
+					<div>
+						<p class="form-summary__label">Total calories estimées</p>
+						<h2 class="form-summary__value">
+							<span data-meal-total-calories>{{ totalCalories|default('0') }}</span>
+							kcal
+						</h2>
+					<p class="form-helper form-helper--spaced">
+						Cible journée :
+						{{ targetCalories }}
+						kcal • Cible par repas :
+						{{ perMealTarget }}
+						kcal ({{ minCalories }}-{{ maxCalories }}
+						kcal)
+					</p>
+				</div>
+				<div class="form-actions">
+					<form id="meal-save-form" method="post">
+						<input type="hidden" name="_token" value="{{ csrf_token('save_repas') }}">
+						<button class="btn btn--primary" type="submit">Enregistrer</button>
+						<a class="btn btn--ghost" href="{{ path('repas') }}">Annuler</a>
+					</form>
+				</div>
+			</section>
+		</section>
+	</div>
+{% endblock %}

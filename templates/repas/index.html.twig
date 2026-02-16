@@ -1,0 +1,145 @@
+{% extends 'layout.html.twig' %}
+{% block title %}Repas - NutriFit{% endblock %}
+
+{% block content %}
+	<div class="page-section">
+		<section class="page-panel">
+			<header class="panel-header">
+				<div>
+					<h1 class="panel-title">Mes repas</h1>
+					<p class="panel-subtitle">
+						Objectif : enregistrer vos repas et comparer à votre objectif.
+					</p>
+					<div class="panel-actions">
+						<a class="btn btn--primary" href="{{ path('repas_new') }}">Ajouter un repas</a>
+					</div>
+				</div>
+				<div class="panel-illustration">
+					<div class="panel-illustration__text">
+                        <img src="{{ asset('img/illustration_repas.webp') }}" alt="Illustration repas">
+					</div>
+				</div>
+			</header>
+
+			<div class="card card--list section-block--sm">
+				<div class="chip-row">
+					<a class="chip{% if period == 'day' %} chip--active{% endif %}" href="{{ path('repas', { period: 'day' }) }}">Auj.</a>
+					<a class="chip{% if period == 'week' %} chip--active{% endif %}" href="{{ path('repas', { period: 'week' }) }}">Semaine</a>
+					<a class="chip{% if period == 'month' %} chip--active{% endif %}" href="{{ path('repas', { period: 'month' }) }}">Mois</a>
+					<a class="chip{% if period == 'all' %} chip--active{% endif %}" href="{{ path('repas', { period: 'all' }) }}">Tous</a>
+				</div>
+
+				<div class="section-block--sm">
+					{% if mealGroups is empty %}
+						<p class="empty-state">Aucun repas enregistré.</p>
+					{% else %}
+						{% for group in mealGroups %}
+							<div class="section-block--sm">
+								<h2 class="section-title">{{ group.label }}</h2>
+								<div class="table-wrap">
+									<table class="data-table data-table--meal">
+										<thead>
+											<tr>
+												<th>Plat</th>
+												<th>Type</th>
+												<th>Date et heure</th>
+												<th>Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for meal in group.meals %}
+												<tr>
+													<td>
+														<div class="list-row__left">
+															<div class="table-avatar">
+																{{ meal.typeRepas|slice(0,1)|upper }}
+															</div>
+															<div>
+																{% set firstElement = meal.elementsRepas|first %}
+																
+																{% set firstRecipe = firstElement and firstElement.recette ? firstElement.recette : null %}
+																
+																{% set instructions = firstRecipe and firstRecipe.rawJson is not empty ? firstRecipe.rawJson.instructions|default(null) : null %}
+																<p class="list-row__title">
+																	{% if firstElement %}
+																		{{ firstElement.recette ? firstElement.recette.titre : firstElement.libelle }}
+																		{% if meal.elementsRepas|length > 1 %}
+																			(+{{ meal.elementsRepas|length - 1 }})
+																		{% endif %}
+																	{% else %}
+																		{{ meal.typeRepas }}
+																	{% endif %}
+																</p>
+																<small class="table-meta">{{ meal.totalCalories }}
+																	kcal</small>
+																{% if instructions %}
+																	{% set instructionsText = instructions|striptags|trim %}
+																	<small class="table-meta">
+																		{{ instructionsText|slice(0, 160) }}
+																		{% if instructionsText|length > 160 %}…
+																		{% endif %}
+																	</small>
+																{% endif %}
+																{% if firstRecipe and firstRecipe.spoonacularId %}
+																	<div class="table-actions">
+																		<a class="btn btn--ghost" href="{{ path('repas_recipe_details', { mealId: meal.id, recipeId: firstRecipe.spoonacularId, period: period }) }}">
+																			Voir la recette
+																		</a>
+																	</div>
+																{% endif %}
+															</div>
+														</div>
+													</td>
+													<td>{{ meal.typeRepas }}</td>
+													<td>{{ meal.dateRepas|date('d/m H:i') }}</td>
+													<td>
+														<div class="table-actions">
+															<a class="btn btn--ghost" href="{{ path('repas_edit', { id: meal.id }) }}" aria-label="Modifier">✏️</a>
+															<form method="post" action="{{ path('repas_delete', { id: meal.id }) }}" onsubmit="return confirm('Supprimer ce repas ?');">
+																<input type="hidden" name="_token" value="{{ csrf_token('delete_repas_' ~ meal.id) }}">
+																<button class="btn btn--ghost" type="submit" aria-label="Supprimer">🗑️</button>
+															</form>
+														</div>
+													</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						{% endfor %}
+					{% endif %}
+				</div>
+			</div>
+
+			<div class="grid grid--cards">
+				<article class="card">
+					<h2 class="card-title card-title--sm">Top repas activité</h2>
+					{% if topMeals is defined and topMeals %}
+						<ol class="compact-list">
+							{% for meal in topMeals|slice(0, 3) %}
+								<li>{{ meal.typeRepas }}
+									—
+									{{ meal.totalCalories }}
+									kcal</li>
+							{% endfor %}
+						</ol>
+					{% else %}
+						<p class="stat-label">Aucun repas.</p>
+					{% endif %}
+				</article>
+
+				<article class="card">
+					<div class="card-header">
+						<h3 class="card-title">Calories (7j)</h3>
+						<span class="section-note">{{ averageCaloriesWeek|default(0) }}
+							kcal</span>
+					</div>
+					<div class="chart-canvas-wrap">
+						<canvas class="chart-canvas" data-chart data-chart-type="bar" data-dataset-label="Calories" data-labels='{{ mealChart.labels|default([])|json_encode }}' data-values='{{ mealChart.values|default([])|json_encode }}'></canvas>
+					</div>
+				</article>
+			</div>
+		</section>
+	</div>
+{% endblock %}

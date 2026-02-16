@@ -1,9 +1,17 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
+
 framework:
     secret: '%env(APP_SECRET)%'
+    default_locale: fr
 
     # Note that the session will be started ONLY if you read or write from it.
     session: true
+
+    rate_limiter:
+        reset_password_request:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '15 minutes'
 
     #esi: true
     #fragments: true
@@ -13,3 +21,7 @@ when@test:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+
+when@dev:
+    framework:
+        disallow_search_engine_index: false

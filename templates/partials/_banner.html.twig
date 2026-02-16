@@ -1,0 +1,84 @@
+<nav class="site-nav" aria-label="Navigation principale">
+    <div class="site-nav__inner">
+        <a class="site-nav__brand" href="/">
+            <span class="site-nav__brand-icon" aria-hidden="true">
+                <img class="site-nav__brand-logo" src="{{ asset('img/logonutrifit.webp') }}" alt="Logo NutriFit">
+            </span>
+        </a>
+
+        <input class="site-nav__toggle-input" type="checkbox" id="menu-toggle" aria-label="Permuter la navigation">
+        <label class="site-nav__toggle" for="menu-toggle">
+            <span class="site-nav__toggle-bar"></span>
+            <span class="visually-hidden">Ouvrir ou fermer le menu</span>
+        </label>
+
+        <div class="site-nav__menu" id="menu">
+            <ul class="site-nav__list">
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                <li class="site-nav__item">
+                    <a href="{{ path('dashboard_show') }}" class="site-nav__link{% if app.current_route == 'dashboard_show' %} site-nav__link--active{% endif %}">Tableau de bord</a>
+                </li>
+                <li class="site-nav__item">
+                    <a href="{{ path('repas') }}" class="site-nav__link{% if app.current_route == 'repas' %} site-nav__link--active{% endif %}">Repas</a>
+                </li>
+                <li class="site-nav__item">
+                    <a href="{{ path('activite') }}" class="site-nav__link{% if app.current_route == 'activite' %} site-nav__link--active{% endif %}">Activité</a>
+                </li>
+                <li class="site-nav__item">
+                    <a href="{{ path('app_contact') }}" class="site-nav__link{% if app.current_route == 'app_contact' %} site-nav__link--active{% endif %}">Contact</a>
+                </li>
+                {% else %}
+                <li class="site-nav__item">
+                    {% if app.current_route == 'home' %}
+                    <a class="site-nav__link site-nav__link--active" aria-current="page" aria-label="Retour accueil" href="/">
+                    {% else %}
+                    <a class="site-nav__link" aria-label="Retour accueil" href="/">
+                    {% endif %}
+                        <svg class="site-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 3.5 3 11h2v9h5v-6h4v6h5v-9h2L12 3.5Z"></path>
+                        </svg>
+                    </a>
+                </li>
+                <li class="site-nav__item">
+                    <a href="{{ path('app_contact') }}" class="site-nav__link{% if app.current_route == 'app_contact' %} site-nav__link--active{% endif %}">Contact</a>
+                </li>
+                <li class="site-nav__item">
+                    <a href="{{ path('activite') }}" class="site-nav__link{% if app.current_route == 'activite' %} site-nav__link--active{% endif %}">Activité</a>
+                </li>
+                <li class="site-nav__item">
+                    <a href="{{ path('repas') }}" class="site-nav__link{% if app.current_route == 'repas' %} site-nav__link--active{% endif %}">Repas</a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <div class="site-nav__actions">
+                {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+                <a href="{{ path('app_login') }}" class="site-nav__button{% if app.current_route == 'app_login' %} site-nav__button--active{% endif %}">Se connecter</a>
+                <a href="{{ path('app_register') }}" class="site-nav__button site-nav__button--primary{% if app.current_route == 'app_register' %} site-nav__button--active{% endif %}">S'inscrire</a>
+                {% else %}
+                {% set profil = app.user.profilUtilisateur ?? null %}
+                {% set displayName = profil and profil.pseudo ? profil.pseudo : app.user.email|split('@')|first %}
+                <div class="site-nav__item site-nav__item--profile">
+                    <button class="site-nav__profile" type="button" aria-haspopup="true" aria-label="Ouvrir le menu utilisateur">
+                        <span class="site-nav__avatar">{{ displayName|slice(0, 1)|upper }}</span>
+                        <span class="site-nav__profile-name">{{ displayName }}</span>
+                        <svg class="site-nav__chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </button>
+                    <div class="site-nav__dropdown site-nav__dropdown--right">
+                        <ul>
+                            <li><a href="{{ path('profile') }}">Mon compte</a></li>
+                            <li><a href="{{ path('dashboard_show') }}">Tableau de bord</a></li>
+                            {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_AUTHOR') %}
+                            <li><a href="{{ path('admin') }}">Administration</a></li>
+                            {% endif %}
+                            <li><a href="{{ path('app_logout') }}">Se déconnecter</a></li>
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,20 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %} {% endblock %}
+
+{% block body %}
+    <div class="auth-page">
+        <section class="auth-card">
+            <h1>Réinitialiser votre mot de passe</h1>
+
+            {{ form_start(resetForm) }}
+                {{ form_row(resetForm.plainPassword) }}
+                <button class="btn btn-primary">Réinitialiser le mot de passe</button>
+            {{ form_end(resetForm) }}
+
+            <div class="auth-actions">
+                <a class="btn btn--ghost" href="{{ path('home') }}">Retour à l'accueil</a>
+            </div>
+        </section>
+    </div>
+{% endblock %}

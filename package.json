@@ -1,0 +1,20 @@
+{
+  "name": "nutrifit",
+  "version": "1.0.0",
+  "description": "Application web de suivi nutrition/fitness (repas, activités, objectifs) basée sur Symfony.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "build:css": "sass --source-map assets/styles/scss/main.scss assets/styles/main.css && sass --style compressed --source-map assets/styles/scss/main.scss assets/styles/main.min.css",
+    "watch:css": "sass --watch assets/styles/scss/main.scss:assets/styles/main.css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.97.3"
+  }
+}
