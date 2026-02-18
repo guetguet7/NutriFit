@@ -45,21 +45,27 @@ final class ProfileController extends AbstractController
         if ($profil === null) {
             $profil = new ProfilUtilisateur();
         }
+        // The owner must be set before validation, otherwise NotNull(utilisateur)
+        // keeps the form invalid with no mapped field error.
+        $profil->setUtilisateur($user);
 
         $this->denyAccessUnlessGranted('PROFIL_EDIT', $profil);
         $form = $this->createForm(ProfilUtilisateurType::class, $profil);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $profil->setUtilisateur($user);
             $entityManager->persist($profil);
             $entityManager->flush();
 
             return $this->redirectToRoute('profile');
         }
 
+        $statusCode = $form->isSubmitted() && !$form->isValid()
+            ? Response::HTTP_UNPROCESSABLE_ENTITY
+            : Response::HTTP_OK;
+
         return $this->render('profile/edit.html.twig', [
             'form' => $form->createView(),
-        ]);
+        ], new Response('', $statusCode));
     }
 }

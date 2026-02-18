@@ -1,11 +1,28 @@
 // NutriFit/assets/charts.js
-import Chart from 'chart.js/auto';
 
-function initCharts() {
+let chartLibPromise = null;
+
+const loadChartLibrary = async () => {
+    if (!chartLibPromise) {
+        chartLibPromise = import('chart.js/auto')
+            .then((module) => module.default)
+            .catch(() => null);
+    }
+
+    return chartLibPromise;
+};
+
+async function initCharts() {
     const chartCanvases = document.querySelectorAll('[data-chart]');
 
-    //Si la librairie Chart.js n'est pas chargée ou qu'il n'y a pas de canvas à initialiser, on quitte la fonction
-    if (!Chart || chartCanvases.length === 0) {
+    if (chartCanvases.length === 0) {
+        return;
+    }
+
+    const Chart = await loadChartLibrary();
+
+    //Si la librairie Chart.js n'est pas chargée, on quitte sans bloquer les autres scripts.
+    if (!Chart) {
         return;
     }
 

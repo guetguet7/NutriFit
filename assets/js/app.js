@@ -10,9 +10,58 @@ import './recipe_search.js';
 
 console.log('Bonjour et bienvenue dans votre application NutriFit ! ');
 
-const initMealModeSwitch = () => {
+const initNavToggle = () => {
+    const nav = document.querySelector('.site-nav');
+    if (!nav || nav.dataset.navToggleInitialized === '1') {
+        return;
+    }
+
+    const toggleInput = nav.querySelector('.site-nav__toggle-input');
+    const toggleButton = nav.querySelector('[data-nav-toggle]');
+    const menu = nav.querySelector('#menu');
+    if (!toggleInput || !toggleButton || !menu) {
+        return;
+    }
+
+    const syncState = () => {
+        const expanded = toggleInput.checked;
+        toggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        toggleButton.setAttribute('aria-label', expanded ? 'Fermer le menu principal' : 'Ouvrir le menu principal');
+    };
+
+    const closeMenu = () => {
+        toggleInput.checked = false;
+        syncState();
+    };
+
+    toggleInput.checked = false;
+    syncState();
+
+    toggleButton.addEventListener('click', () => {
+        toggleInput.checked = !toggleInput.checked;
+        syncState();
+    });
+
+    menu.addEventListener('click', (event) => {
+        if (event.target instanceof Element && event.target.closest('a')) {
+            closeMenu();
+        }
+    });
+
+    nav.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && toggleInput.checked) {
+            event.preventDefault();
+            closeMenu();
+            toggleButton.focus();
+        }
+    });
+
+    nav.dataset.navToggleInitialized = '1';
+};
+
+const syncMealModePanels = () => {
     const switchRoot = document.querySelector('[data-meal-mode-switch]');
-    if (!switchRoot || switchRoot.dataset.initialized === '1') {
+    if (!switchRoot) {
         return;
     }
 
@@ -22,27 +71,33 @@ const initMealModeSwitch = () => {
         return;
     }
 
-    const setPanelState = (panel, disabled) => {
+    const selectedMode = radios.find((radio) => radio.checked)?.value || 'api';
+    panels.forEach((panel) => {
+        const disabled = panel.dataset.mealModePanel !== selectedMode;
         panel.hidden = disabled;
         panel.querySelectorAll('input, select, textarea, button').forEach((element) => {
             element.disabled = disabled;
         });
-    };
-
-    const syncPanels = () => {
-        const selectedMode = radios.find((radio) => radio.checked)?.value || 'api';
-        panels.forEach((panel) => {
-            setPanelState(panel, panel.dataset.mealModePanel !== selectedMode);
-        });
-    };
-
-    radios.forEach((radio) => {
-        radio.addEventListener('change', syncPanels);
     });
-
-    syncPanels();
-    switchRoot.dataset.initialized = '1';
 };
 
-document.addEventListener('DOMContentLoaded', initMealModeSwitch);
-document.addEventListener('turbo:load', initMealModeSwitch);
+const handleMealModeChange = (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) {
+        return;
+    }
+    if (target.name !== 'modeAjout') {
+        return;
+    }
+    if (!target.closest('[data-meal-mode-switch]')) {
+        return;
+    }
+
+    syncMealModePanels();
+};
+
+document.addEventListener('change', handleMealModeChange);
+document.addEventListener('DOMContentLoaded', syncMealModePanels);
+document.addEventListener('turbo:load', syncMealModePanels);
+document.addEventListener('DOMContentLoaded', initNavToggle);
+document.addEventListener('turbo:load', initNavToggle);

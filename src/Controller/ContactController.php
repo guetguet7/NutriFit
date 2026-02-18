@@ -21,15 +21,19 @@ final class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $name = (string) ($contact->name ?? '');
+            $emailAddress = (string) ($contact->email ?? '');
+            $messageBody = (string) ($contact->message ?? '');
+
             $email = (new Email())
                 ->from('no-reply@nutrifit.local')
                 ->to($this->getParameter('contact_to'))
-                ->replyTo($contact->email)
+                ->replyTo($emailAddress)
                 ->subject('Nouveau message de contact')
                 ->text(
-                    "Nom: {$contact->name}\n"
-                    . "Email: {$contact->email}\n\n"
-                    . $contact->message
+                    "Nom: {$name}\n"
+                    . "Email: {$emailAddress}\n\n"
+                    . $messageBody
                 );
 
             $mailer->send($email);
@@ -38,8 +42,12 @@ final class ContactController extends AbstractController
             return $this->redirectToRoute('app_contact');
         }
 
+        $statusCode = $form->isSubmitted() && !$form->isValid()
+            ? Response::HTTP_UNPROCESSABLE_ENTITY
+            : Response::HTTP_OK;
+
         return $this->render('contact/index.html.twig', [
             'form' => $form->createView(),
-        ]);
+        ], new Response('', $statusCode));
     }
 }

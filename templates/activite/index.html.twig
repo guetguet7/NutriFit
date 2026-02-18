@@ -88,7 +88,7 @@
 													<td>
 														<div class="table-actions">
 															<a class="btn btn--ghost" href="{{ path('activite_edit', { id: activity.id }) }}" aria-label="Modifier">✏️</a>
-															<form method="post" action="{{ path('activite_delete', { id: activity.id }) }}" onsubmit="return confirm('Supprimer cette activité ?');">
+																<form method="post" action="{{ path('activite_delete', { id: activity.id }) }}" onsubmit="return confirm('Supprimer cette activité ?');" novalidate>
 																<input type="hidden" name="_token" value="{{ csrf_token('delete_activite_' ~ activity.id) }}">
 																<button class="btn btn--ghost" type="submit" aria-label="Supprimer">🗑️</button>
 															</form>

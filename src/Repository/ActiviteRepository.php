@@ -20,6 +20,7 @@ final class ActiviteRepository extends ServiceEntityRepository
     /**
      * @return Activite[]
      */
+    //la méthode "findByUserAndPeriod" permet de récupérer les activités d'un utilisateur sur une période donnée, en filtrant les résultats par date et en les triant par date d'activité de manière descendante pour afficher les activités les plus récentes en premier.
     public function findByUserAndPeriod(User $user, ?\DateTimeImmutable $start, ?\DateTimeImmutable $end): array
     {
         $qb = $this->createQueryBuilder('a')

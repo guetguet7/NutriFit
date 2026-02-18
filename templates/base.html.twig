@@ -3,14 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}NutriFit{% endblock %}</title>
-        <meta name="description" content="{% block description %}Site de sport{% endblock %}">
+        <meta name="description" content="{% block description %}Site de nutrition et d'activité physique{% endblock %}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="preload" href="{{ asset('fonts/manrope/Manrope-400.woff2') }}" as="font" type="font/woff2" crossorigin>
-        <link rel="preload" href="{{ asset('fonts/manrope/Manrope-600.woff2') }}" as="font" type="font/woff2" crossorigin>
-        <link rel="preload" href="{{ asset('fonts/manrope/Manrope-700.woff2') }}" as="font" type="font/woff2" crossorigin>
-
-        <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij48cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgcng9IjI4IiBmaWxsPSIjMWQ3ZDViIi8+PHRleHQgeD0iNTAlIiB5PSI1OCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNjQiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZmlsbD0id2hpdGUiPk5GPC90ZXh0Pjwvc3ZnPg==">
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
         {% block stylesheets %}
             <link rel="stylesheet" href="{{ asset('styles/app.css') }}">

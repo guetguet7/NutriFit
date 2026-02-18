@@ -18,14 +18,16 @@ final class SpoonacularClient
      */
     public function searchRecipes(string $query, int $minCalories, int $maxCalories, int $limit = 8): array
     {
+        // Si la clé API n'est pas configurée, on lève une exception explicite pour permettre l'affichage d'un message d'erreur côté interface.
         if ($this->spoonacularApiKey === '') {
-            return [];
+            //runtime exception est utilisée ici pour signaler une erreur de configuration critique qui empêche le fonctionnement normal du service, ce qui est approprié dans ce contexte où l'absence de la clé API rend le service inutilisable.
+            throw new \RuntimeException('La clé API Spoonacular n\'est pas configurée.');
         }
 
+        //la recherche de recettes est effectuée en deux étapes : d'abord avec les contraintes caloriques, puis sans les contraintes si aucun résultat n'est trouvé, afin d'augmenter les chances d'obtenir des résultats pertinents malgré les limitations de l'API.
         $recipes = $this->fetchRecipes($query, $limit, $minCalories, $maxCalories);
 
         // la recette de Spoonacular peut parfois ne pas respecter les contraintes caloriques, ce qui peut entraîner des résultats vides même lorsque des recettes pertinentes existent.
-        // en effectuant une recherche sans les contraintes caloriques, on peut augmenter les chances d'obtenir des résultats pertinents, tout en restant tolérant aux limitations de l'API.
         if ($recipes === []) {
             $recipes = $this->fetchRecipes($query, $limit, null, null);
         }
@@ -36,12 +38,16 @@ final class SpoonacularClient
     /**
      * @return array<int, array{id: int|null, title: string, image: string|null, calories: int|null, servings: int|null}>
      */
+    //la méthode "fetchRecipes" est responsable de l'appel à l'API de Spoonacular pour récupérer les recettes en fonction des critères de recherche, avec une validation minimale des données pour garantir la robustesse du code face aux réponses inattendues de l'API.
     private function fetchRecipes(string $query, int $limit, ?int $minCalories, ?int $maxCalories): array
     {
         $queryParams = [
             'apiKey' => $this->spoonacularApiKey,//la clé API est essentielle pour authentifier les requêtes auprès de l'API de Spoonacular, et elle doit être incluse dans tous les appels pour garantir l'accès aux données.
+
             'query' => $query,//la recherche de recettes est effectuée en utilisant le point d'entrée "complexSearch" de l'API de Spoonacular, qui permet de filtrer les résultats en fonction de divers critères, y compris les calories.
+
             'number' => $limit,//le nombre de résultats à retourner est contrôlé par le paramètre "number", qui est défini en fonction de la limite spécifiée dans la méthode "searchRecipes".
+
             'addRecipeNutrition' => true,//en ajoutant le paramètre "addRecipeNutrition" à la requête, on peut obtenir des informations nutritionnelles détaillées pour chaque recette, ce qui est nécessaire pour calculer les calories totales de la recette.
         ];
 
@@ -56,9 +62,14 @@ final class SpoonacularClient
         
         //L'API de Spoonacular peut parfois retourner des réponses mal formées ou des structures inattendues,
         //il est donc important d'ajouter des vérifications pour éviter les erreurs de type et garantir que le code reste robuste face à ces situations.
+        
         $response = $this->httpClient->request('GET', 'https://api.spoonacular.com/recipes/complexSearch', [
             'query' => $queryParams,
         ]);
+
+        if ($response->getStatusCode() >= 400) {
+            throw new \RuntimeException('Réponse invalide du service Spoonacular.');
+        }
 
         //en utilisant "toArray(false)", on peut éviter les exceptions en cas de réponse mal formée, ce qui permet de gérer les erreurs de manière plus souple et d'assurer que le code continue à fonctionner même lorsque l'API retourne des données inattendues.
         $payload = $response->toArray(false);

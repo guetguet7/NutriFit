@@ -2,56 +2,74 @@
 {% block title %}Modifier une activité - NutriFit{% endblock %}
 
 {% block content %}
-<div class="page-section">
-  <section class="page-panel">
-    <header class="panel-header--split">
-      <div>
-        <h1 class="panel-title">Modifier une activité</h1>
-        <p class="panel-subtitle">Mettez à jour votre séance.</p>
-      </div>
-      <a class="btn btn--ghost" href="{{ path('activite') }}">Retour</a>
-    </header>
+	<div class="page-section">
+		<section class="page-panel">
+			<header class="panel-header--split">
+				<div>
+					<h1 class="panel-title">Modifier une activité</h1>
+					<p class="panel-subtitle">Mettez à jour votre séance.</p>
+				</div>
+				<a class="btn btn--ghost" href="{{ path('activite') }}">Retour</a>
+			</header>
 
-    <form method="post" class="form-section">
-      <section class="form-card">
-        <h2 class="form-title">Infos principales</h2>
-        <div class="grid grid--form">
-          <div class="form-field">
-            <label for="activity-type" class="form-label">Type d'activité</label>
-            <select id="activity-type" name="type" class="form-select">
-              <option value="course" {% if activite.type == 'course' %}selected{% endif %}>Course</option>
-              <option value="marche" {% if activite.type == 'marche' %}selected{% endif %}>Marche</option>
-              <option value="velo" {% if activite.type == 'velo' %}selected{% endif %}>Vélo</option>
-              <option value="natation" {% if activite.type == 'natation' %}selected{% endif %}>Natation</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="activity-date" class="form-label">Date / heure</label>
-            <input id="activity-date" name="dateActivite" type="datetime-local" class="form-input" value="{{ activite.dateActivite ? activite.dateActivite|date('Y-m-d\\TH:i') : '' }}" required>
-          </div>
-          <div class="form-field">
-            <label for="activity-duration" class="form-label">Durée (minutes)</label>
-            <input id="activity-duration" name="dureeMin" type="number" min="1" step="1" class="form-input" value="{{ activite.dureeMin }}" required>
-          </div>
-          <div class="form-field">
-            <label for="activity-calories" class="form-label">Calories brûlées</label>
-            <input id="activity-calories" name="caloriesBrulees" type="number" min="1" step="1" class="form-input" value="{{ activite.caloriesBrulees }}" required>
-          </div>
-        </div>
-      </section>
+				<form method="post" class="form-section" novalidate data-turbo="false">
+					{% if formErrors is defined and formErrors|length > 0 and (fieldErrors is not defined or fieldErrors.global is not defined) %}
+						<p class="form-helper form-helper--error">Veuillez corriger les champs en rouge.</p>
+					{% endif %}
+					{% if fieldErrors is defined and fieldErrors.global is defined %}
+						<p class="form-helper form-helper--error">{{ fieldErrors.global|first }}</p>
+					{% endif %}
+				<section class="form-card">
+					<h2 class="form-title">Infos principales</h2>
+					<div class="grid grid--form">
+						<div class="form-field">
+							<label for="activity-type" class="form-label">Type d'activité</label>
+							<select id="activity-type" name="type" class="form-select">
+								<option value="course" {% if typeValue == 'course' %}selected{% endif %}>Course</option>
+								<option value="marche" {% if typeValue == 'marche' %}selected{% endif %}>Marche</option>
+								<option value="velo" {% if typeValue == 'velo' %}selected{% endif %}>Vélo</option>
+								<option value="natation" {% if typeValue == 'natation' %}selected{% endif %}>Natation</option>
+							</select>
+							{% if fieldErrors is defined and fieldErrors.type is defined %}
+								<p class="form-helper form-helper--error">{{ fieldErrors.type|first }}</p>
+							{% endif %}
+						</div>
+						<div class="form-field">
+							<label for="activity-date" class="form-label">Date / heure</label>
+							<input id="activity-date" name="dateActivite" type="datetime-local" class="form-input" value="{{ dateActiviteValue }}" required>
+							{% if fieldErrors is defined and fieldErrors.dateActivite is defined %}
+								<p class="form-helper form-helper--error">{{ fieldErrors.dateActivite|first }}</p>
+							{% endif %}
+						</div>
+							<div class="form-field">
+								<label for="activity-duration" class="form-label">Durée (minutes)</label>
+								{% if fieldErrors is defined and fieldErrors.dureeMin is defined %}
+									<p class="form-helper form-helper--error">{{ fieldErrors.dureeMin|first }}</p>
+								{% endif %}
+								<input id="activity-duration" name="dureeMin" type="number" min="1" step="1" class="form-input" value="{{ dureeMinValue }}" required>
+							</div>
+						<div class="form-field">
+							<label for="activity-calories" class="form-label">Calories brûlées</label>
+							<input id="activity-calories" name="caloriesBrulees" type="number" min="1" step="1" class="form-input" value="{{ caloriesBruleesValue }}" required>
+							{% if fieldErrors is defined and fieldErrors.caloriesBrulees is defined %}
+								<p class="form-helper form-helper--error">{{ fieldErrors.caloriesBrulees|first }}</p>
+							{% endif %}
+						</div>
+					</div>
+				</section>
 
-      <section class="form-summary">
-        <div>
-          <p class="form-summary__label">Activité</p>
-          <h2 class="form-summary__value">{{ activite.type|capitalize }}</h2>
-        </div>
-        <div class="form-actions">
-          <input type="hidden" name="_token" value="{{ csrf_token('edit_activite_' ~ activite.id) }}">
-          <button class="btn btn--primary" type="submit">Enregistrer</button>
-          <a class="btn btn--ghost" href="{{ path('activite') }}">Annuler</a>
-        </div>
-      </section>
-    </form>
-  </section>
-</div>
+				<section class="form-summary">
+					<div>
+						<p class="form-summary__label">Activité</p>
+						<h2 class="form-summary__value">{{ activite.type|capitalize }}</h2>
+					</div>
+					<div class="form-actions">
+						<input type="hidden" name="_token" value="{{ csrf_token('edit_activite_' ~ activite.id) }}">
+						<button class="btn btn--primary" type="submit">Enregistrer</button>
+						<a class="btn btn--ghost" href="{{ path('activite') }}">Annuler</a>
+					</div>
+				</section>
+			</form>
+		</section>
+	</div>
 {% endblock %}

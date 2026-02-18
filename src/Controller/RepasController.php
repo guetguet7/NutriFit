@@ -60,7 +60,8 @@ class RepasController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $this->denyAccessUnlessGranted('REPAS_VIEW', $repas);
+        $this->denyAccessUnlessGranted(
+            'REPAS_VIEW', $repas);
 
         $recette = $entityManager->getRepository(Recette::class)->findOneBy(['spoonacularId' => $recipeId]);
         if (!$recette instanceof Recette) {
@@ -105,18 +106,27 @@ class RepasController extends AbstractController
     #[Route('/api/recipes', name: 'api_recipes', methods: ['GET'])]
     public function apiRecipes(Request $request, SpoonacularClient $spoonacularClient): JsonResponse
     {
+        // Endpoint d'API pour la recherche de recettes, utilisé par le formulaire de création de repas. Accepte les paramètres de requête suivants :
         $query = trim($request->query->getString('q', ''));
+        // Si la requête de recherche est vide, retourner une réponse JSON avec un tableau de résultats vide pour éviter les appels inutiles à l'API Spoonacular.
         if ($query === '') {
             return $this->json(['results' => []]);
         }
 
+        // Les paramètres de calories min et max sont optionnels,
+        // avec des valeurs par défaut raisonnables pour guider les utilisateurs vers des recettes adaptées à un repas typique.
         $min = (int) $request->query->getString('min', '0');
         $max = (int) $request->query->getString('max', '10000');
+
+        // Appeler le service Spoonacular pour rechercher des recettes correspondant à la requête et aux critères de calories.
 
         try {
             $results = $spoonacularClient->searchRecipes($query, $min, $max);
         } catch (\Throwable) {
-            return $this->json(['results' => []], Response::HTTP_BAD_REQUEST);
+            return $this->json([
+                'results' => [],
+                'message' => 'Le service de recettes est temporairement indisponible. Réessayez dans quelques instants.',
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         return $this->json(['results' => $results]);
@@ -134,7 +144,7 @@ class RepasController extends AbstractController
         $profil = $user->getProfilUtilisateur();
         $targetCalories = $profil ? $calorieCalculator->getTargetKcal($profil) : 2000;
 
-        //
+
         $perMealTarget = (int) round($targetCalories / 3);
         $minCalories = (int) round($perMealTarget * 0.85);
         $maxCalories = (int) round($perMealTarget * 1.15);
@@ -142,16 +152,39 @@ class RepasController extends AbstractController
         // Récupération des recettes de l'API Spoonacular
         $session = $request->getSession();
         $sessionKey = 'repas_selected_recipes';
+        $formErrors = [];
+        $fieldErrors = [];
+        $addError = static function (array &$errors, array &$fields, string $message, ?string $field = null): void {
+            $errors[] = $message;
+            if ($field !== null) {
+                $fields[$field][] = $message;
+            }
+        };
         /** @var array<int, array{id: int, title: string, image: string|null, calories: int|null, servings: int|null, qty: float}> $selectedRecipes */
         $selectedRecipes = $session->get($sessionKey, []);
 
         $searchQuery = $request->query->getString('search', '');
-        $spoonacularResults = [];
-        if ($searchQuery !== '') {
-            $spoonacularResults = $spoonacularClient->searchRecipes($searchQuery, $minCalories, $maxCalories);
-        }
 
         $selectRecipeId = $request->query->getInt('selectRecipe');
+        
+        $removeRecipeId = $request->query->getInt('removeRecipe');
+        $isFreshPageLoad = !$request->isMethod('POST')
+            && $searchQuery === ''
+            && $selectRecipeId <= 0
+            && $removeRecipeId <= 0;
+        if ($isFreshPageLoad) {
+            $selectedRecipes = [];
+            $session->remove($sessionKey);
+        }
+        $spoonacularResults = [];
+        if ($searchQuery !== '') {
+            try {
+                $spoonacularResults = $spoonacularClient->searchRecipes($searchQuery, $minCalories, $maxCalories);
+            } catch (\Throwable) {
+                $addError($formErrors, $fieldErrors, 'Le service de recettes est indisponible pour le moment. Réessayez plus tard.', 'apiSearch');
+            }
+        }
+
         if ($selectRecipeId > 0) {
             foreach ($spoonacularResults as $result) {
                 if (($result['id'] ?? null) === $selectRecipeId) {
@@ -186,7 +219,6 @@ class RepasController extends AbstractController
             }
         }
 
-        $removeRecipeId = $request->query->getInt('removeRecipe');
         if ($removeRecipeId > 0 && isset($selectedRecipes[$removeRecipeId])) {
             unset($selectedRecipes[$removeRecipeId]);
             $session->set($sessionKey, $selectedRecipes);
@@ -201,8 +233,10 @@ class RepasController extends AbstractController
             $mealDateValue = (new \DateTimeImmutable('now'))->format('Y-m-d\TH:i');
         }
 
+        // Traitement du formulaire de création de repas
         if ($request->isMethod('POST')) {
-            if (!$this->isCsrfTokenValid('save_repas', $request->request->getString('_token'))) {
+            if (!$this->isCsrfTokenValid('save_repas', 
+                $request->request->getString('_token'))) {
                 throw $this->createAccessDeniedException();
             }
 
@@ -216,17 +250,18 @@ class RepasController extends AbstractController
             $dateRaw = $request->request->getString('dateRepas', '');
             $dateRepas = $this->parseMealDate($dateRaw);
             if (!$dateRepas instanceof \DateTimeImmutable) {
-                $this->addFlash('warning', 'Date invalide: heure actuelle utilisée automatiquement.');
-                $dateRepas = new \DateTimeImmutable('now');
+                $hasInputErrors = true;
+                $addError($formErrors, $fieldErrors, 'La date du repas est obligatoire et doit être valide.', 'dateRepas');
+            } else {
+                $repas->setDateRepas($dateRepas);
+                $mealDateValue = $dateRepas->format('Y-m-d\TH:i');
             }
-            $repas->setDateRepas($dateRepas);
-            $mealDateValue = $dateRepas->format('Y-m-d\TH:i');
 
             $typeRepas = $request->request->getString('typeRepas', $selectedMealType ?? 'dejeuner');
             if (!in_array($typeRepas, $allowedMealTypes, true)) {
                 $typeRepas = $selectedMealType ?? 'dejeuner';
                 $hasInputErrors = true;
-                $this->addFlash('warning', 'Le type de repas est invalide.');
+                $addError($formErrors, $fieldErrors, 'Le type de repas est invalide.', 'typeRepas');
             }
             $repas->setTypeRepas($typeRepas);
 
@@ -239,7 +274,7 @@ class RepasController extends AbstractController
             if (!in_array($source, $allowedSources, true)) {
                 $source = $modeAjout === 'api' ? 'api' : 'manuel';
                 $hasInputErrors = true;
-                $this->addFlash('warning', 'La source du repas est invalide.');
+                $addError($formErrors, $fieldErrors, 'La source du repas est invalide.', 'modeAjout');
             }
             $repas->setSource($source);
 
@@ -250,8 +285,21 @@ class RepasController extends AbstractController
                 $manualCalories = (int) $request->request->getString('manualCalories', '0');
                 $manualQty = (float) $request->request->getString('manualQty', '1');
 
-                // En mode manuel, on n'ajoute un élément que si le nom est renseigné et que les calories et la quantité sont supérieures à 0.
-                if ($manualName !== '' && $manualCalories > 0 && $manualQty > 0) {
+                if ($manualName === '') {
+                    $hasInputErrors = true;
+                    $addError($formErrors, $fieldErrors, 'Le nom du plat est obligatoire en mode manuel.', 'manualName');
+                }
+                if ($manualCalories <= 0) {
+                    $hasInputErrors = true;
+                    $addError($formErrors, $fieldErrors, 'Les calories doivent être supérieures à 0 en mode manuel.', 'manualCalories');
+                }
+                if ($manualQty <= 0) {
+                    $hasInputErrors = true;
+                    $addError($formErrors, $fieldErrors, 'La quantité doit être supérieure à 0 en mode manuel.', 'manualQty');
+                }
+
+                // En mode manuel, on n'ajoute l'élément que si tous les champs obligatoires sont valides.
+                if (!$hasInputErrors) {
                     $element = new ElementRepas();
                     $element->setRepas($repas);
                     $element->setLibelle($manualName);
@@ -264,15 +312,28 @@ class RepasController extends AbstractController
                     $repas->addElementRepas($element);
                 }
             } else {
+                if ($selectedRecipes === []) {
+                    $hasInputErrors = true;
+                    $addError($formErrors, $fieldErrors, 'Sélectionne au moins une recette avant d\'enregistrer.', 'apiSelection');
+                }
+
                 // Les quantités peuvent être personnalisées par l'utilisateur, sinon on prend la quantité par défaut de 1 portion.
                 $selectedQty = $request->request->all('selectedQty');
+                $hasQtyError = false;
+                $hasRecipeDataError = false;
                 foreach ($selectedRecipes as $recipeId => $recipe) {
                     $qty = isset($selectedQty[$recipeId]) ? (float) $selectedQty[$recipeId] : (float) ($recipe['qty'] ?? 1);
-                    $qty = $qty > 0 ? $qty : 1.0;
+                    if ($qty <= 0) {
+                        $hasInputErrors = true;
+                        $hasQtyError = true;
+                        continue;
+                    }
                     $title = (string) ($recipe['title'] ?? 'Recette');
                     $caloriesPerServing = (int) ($recipe['calories'] ?? 0);
 
                     if ($title === '' || $caloriesPerServing <= 0) {
+                        $hasInputErrors = true;
+                        $hasRecipeDataError = true;
                         continue;
                     }
 
@@ -284,6 +345,7 @@ class RepasController extends AbstractController
                     $elementCalories = (int) round($caloriesPerServing * $qty);
                     $element->setCalories($elementCalories);
 
+                    // Si la recette existe déjà en base (par exemple, ajoutée lors d'un repas précédent), on réutilise l'entité existante pour éviter les doublons. Sinon, on crée une nouvelle entité Recette à partir des données de l'API et on la persiste.
                     $recette = $this->upsertApiRecipe($entityManager, (int) $recipeId, $recipe);
                     if ($recette instanceof Recette) {
                         $element->setRecette($recette);
@@ -292,18 +354,25 @@ class RepasController extends AbstractController
                     $totalCalories += $elementCalories;
                     $repas->addElementRepas($element);
                 }
+                if ($hasQtyError) {
+                    $addError($formErrors, $fieldErrors, 'La quantité d\'une recette doit être supérieure à 0.', 'apiSelection');
+                }
+                if ($hasRecipeDataError) {
+                    $addError($formErrors, $fieldErrors, 'Une recette sélectionnée est invalide (titre ou calories manquants).', 'apiSelection');
+                }
             }
 
-            if ($totalCalories <= 0) {
-                $this->addFlash('warning', 'Les calories doivent être supérieures à 0.');
-            } elseif ($hasInputErrors) {
-                // Les erreurs sont déjà remontées via flash messages.
+            if ($hasInputErrors) {
+                // Les erreurs sont déjà remontées via le tableau formErrors.
+            } elseif ($totalCalories <= 0) {
+                $addError($formErrors, $fieldErrors, 'Les calories doivent être supérieures à 0.', 'totalCalories');
             } else {
                 $repas->setTotalCalories($totalCalories);
                 $violations = $validator->validate($repas);
                 if (count($violations) > 0) {
-                    $this->addFlash('warning', (string) $violations->get(0)->getMessage());
+                    $addError($formErrors, $fieldErrors, (string) $violations->get(0)->getMessage(), 'global');
                 } else {
+
                     $entityManager->persist($repas);
                     $entityManager->flush();
 
@@ -320,6 +389,10 @@ class RepasController extends AbstractController
             $totalCaloriesForView = $totalCalories;
         }
 
+        $statusCode = ($request->isMethod('POST') && $formErrors !== [])
+            ? Response::HTTP_UNPROCESSABLE_ENTITY
+            : Response::HTTP_OK;
+
         return $this->render('repas/new.html.twig', [
             'targetCalories' => $targetCalories,
             'perMealTarget' => $perMealTarget,
@@ -331,7 +404,9 @@ class RepasController extends AbstractController
             'selectedMealType' => $selectedMealType,
             'totalCalories' => $totalCaloriesForView,
             'mealDateValue' => $mealDateValue,
-        ]);
+            'formErrors' => $formErrors,
+            'fieldErrors' => $fieldErrors,
+        ], new Response(status: $statusCode));
     }
 
     /**
@@ -365,6 +440,14 @@ class RepasController extends AbstractController
         }
 
         $this->denyAccessUnlessGranted('REPAS_EDIT', $repas);
+        $formErrors = [];
+        $fieldErrors = [];
+        $addError = static function (array &$errors, array &$fields, string $message, ?string $field = null): void {
+            $errors[] = $message;
+            if ($field !== null) {
+                $fields[$field][] = $message;
+            }
+        };
 
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('edit_repas_' . $repas->getId(), $request->request->getString('_token'))) {
@@ -379,7 +462,7 @@ class RepasController extends AbstractController
             $dateRepas = $this->parseMealDate($dateRaw);
             if (!$dateRepas instanceof \DateTimeImmutable) {
                 $hasInputErrors = true;
-                $this->addFlash('warning', 'La date du repas est invalide.');
+                $addError($formErrors, $fieldErrors, 'La date du repas est invalide.', 'dateRepas');
             } else {
                 $repas->setDateRepas($dateRepas);
             }
@@ -388,7 +471,7 @@ class RepasController extends AbstractController
             if (!in_array($typeRepas, $allowedMealTypes, true)) {
                 $typeRepas = $repas->getTypeRepas() ?? 'dejeuner';
                 $hasInputErrors = true;
-                $this->addFlash('warning', 'Le type de repas est invalide.');
+                $addError($formErrors, $fieldErrors, 'Le type de repas est invalide.', 'typeRepas');
             }
             $repas->setTypeRepas($typeRepas);
 
@@ -399,7 +482,7 @@ class RepasController extends AbstractController
             if (!in_array($source, $allowedSources, true)) {
                 $source = $repas->getSource() ?? 'manuel';
                 $hasInputErrors = true;
-                $this->addFlash('warning', 'La source du repas est invalide.');
+                $addError($formErrors, $fieldErrors, 'La source du repas est invalide.', 'source');
             }
             $repas->setSource($source);
 
@@ -416,6 +499,8 @@ class RepasController extends AbstractController
                     $recipeId = (int) ($elementData['recipeId'] ?? 0);
 
                     if ($label === '' || $qty <= 0 || $calories <= 0) {
+                        $hasInputErrors = true;
+                        $addError($formErrors, $fieldErrors, 'Un élément du repas est invalide (libellé, quantité ou calories).', 'elements');
                         continue;
                     }
 
@@ -439,14 +524,14 @@ class RepasController extends AbstractController
             }
 
             if ($totalCalories <= 0) {
-                $this->addFlash('warning', 'Les calories doivent être supérieures à 0.');
+                $addError($formErrors, $fieldErrors, 'Les calories doivent être supérieures à 0.', 'totalCalories');
             } elseif ($hasInputErrors) {
-                // Les erreurs sont déjà remontées via flash messages.
+                // Les erreurs sont déjà remontées via le tableau formErrors.
             } else {
                 $repas->setTotalCalories($totalCalories);
                 $violations = $validator->validate($repas);
                 if (count($violations) > 0) {
-                    $this->addFlash('warning', (string) $violations->get(0)->getMessage());
+                    $addError($formErrors, $fieldErrors, (string) $violations->get(0)->getMessage(), 'global');
                 } else {
                     $entityManager->persist($repas);
                     $entityManager->flush();
@@ -456,9 +541,15 @@ class RepasController extends AbstractController
             }
         }
 
+        $statusCode = ($request->isMethod('POST') && $formErrors !== [])
+            ? Response::HTTP_UNPROCESSABLE_ENTITY
+            : Response::HTTP_OK;
+
         return $this->render('repas/edit.html.twig', [
             'repas' => $repas,
-        ]);
+            'formErrors' => $formErrors,
+            'fieldErrors' => $fieldErrors,
+        ], new Response(status: $statusCode));
     }
 
     /**

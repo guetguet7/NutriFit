@@ -10,11 +10,55 @@
         <div class="flash flash--success" role="alert">{{ message }}</div>
     {% endfor %}
 
-    {{ form_start(form, { attr: { class: 'contact-form' } }) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.message) }}
-        {{ form_row(form.send) }}
+    {{ form_start(form, { attr: { class: 'contact-form form-section', novalidate: 'novalidate', 'data-turbo': 'false' } }) }}
+        {% if form.vars.submitted and not form.vars.valid %}
+            <p class="form-helper form-helper--error">Veuillez corriger les champs du formulaire.</p>
+        {% endif %}
+
+        <div class="form-field">
+            {{ form_label(form.name, null, { label_attr: { class: 'form-label' } }) }}
+            {% for error in form.name.vars.errors %}
+                <p class="form-helper form-helper--error">{{ error.message }}</p>
+            {% endfor %}
+            {{ form_widget(form.name, {
+                attr: {
+                    class: 'form-input',
+                    'aria-invalid': form.name.vars.errors|length > 0 ? 'true' : 'false'
+                }
+            }) }}
+        </div>
+
+        <div class="form-field">
+            {{ form_label(form.email, null, { label_attr: { class: 'form-label' } }) }}
+            {% for error in form.email.vars.errors %}
+                <p class="form-helper form-helper--error">{{ error.message }}</p>
+            {% endfor %}
+            {{ form_widget(form.email, {
+                attr: {
+                    class: 'form-input',
+                    'aria-invalid': form.email.vars.errors|length > 0 ? 'true' : 'false'
+                }
+            }) }}
+        </div>
+
+        <div class="form-field">
+            {{ form_label(form.message, null, { label_attr: { class: 'form-label' } }) }}
+            {% for error in form.message.vars.errors %}
+                <p class="form-helper form-helper--error">{{ error.message }}</p>
+            {% endfor %}
+            {{ form_widget(form.message, {
+                attr: {
+                    class: 'form-input',
+                    'aria-invalid': form.message.vars.errors|length > 0 ? 'true' : 'false'
+                }
+            }) }}
+        </div>
+
+        <div class="form-actions">
+            {{ form_widget(form.send, { attr: { class: 'btn btn--primary' } }) }}
+        </div>
+
+        {{ form_rest(form) }}
     {{ form_end(form) }}
 </div>
 {% endblock %}

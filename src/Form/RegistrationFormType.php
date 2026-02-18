@@ -38,10 +38,10 @@ class RegistrationFormType extends AbstractType
                         //max caracteres permis par symfony
                         max: 4096
                     ),
-                    // new Regex(
-                    //     pattern: '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z\\d]).+$/',
-                    //     message: 'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.'
-                    // ),
+                    new Regex(
+                        pattern: '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z\\d]).+$/',
+                        message: 'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.'
+                    ),
                 ],
             ])
         ;

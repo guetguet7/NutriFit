@@ -6,10 +6,11 @@
 
 {% block body %}
 <div class="page-shell">
+    <a class="skip-link" href="#main-content">Aller au contenu principal</a>
     {{ include('partials/_banner.html.twig') }}
     {{ include('partials/_flash.modal.html.twig') }}
 
-    <main class="page-content">
+    <main class="page-content" id="main-content" tabindex="-1">
         {% block content %}{% endblock %}
     </main>
 

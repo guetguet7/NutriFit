@@ -27,7 +27,10 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, 
+    UserPasswordHasherInterface $userPasswordHasher, 
+    Security $security, 
+    EntityManagerInterface $entityManager): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -37,13 +40,15 @@ class RegistrationController extends AbstractController
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
-            $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+            // hash le mot de passe avant de le stocker
+            $user->setPassword(
+                $userPasswordHasher->hashPassword
+                ($user, $plainPassword));
 
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // generate a signed url and email it to the user
+            // génère une URL de confirmation et l'envoie à l'utilisateur
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
                     ->from(new Address('support@nutrifit.com', 'Support'))
@@ -52,7 +57,7 @@ class RegistrationController extends AbstractController
                     ->htmlTemplate('registration/confirmation_email.html.twig')
             );
 
-            // do anything else you need here, like send an email
+            // connecte automatiquement l'utilisateur après l'inscription
             $session = $request->getSession();
             if ($session !== null) {
                 $this->saveTargetPath($session, 'main', $this->generateUrl('profile_edit'));
@@ -74,7 +79,7 @@ class RegistrationController extends AbstractController
     #[Route('/verify/email', name: 'app_verify_email')]
     public function verifyUserEmail(Request $request, TranslatorInterface $translator): Response
     {
-        // validate email confirmation link, sets User::isVerified=true and persists
+        // valide le lien de confirmation de l'e-mail, si valide, met à jour la propriété "isVerified" de l'utilisateur
         try {
             /** @var User $user */
             $user = $this->getUser();
@@ -85,7 +90,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_register');
         }
 
-        // @TODO Change the redirect on success and handle or remove the flash message in your templates
+        // @TODO : ajouter une redirection vers une page de succès ou le profil de l'utilisateur
         $this->addFlash('success', 'Votre adresse e-mail a bien été vérifiée.');
 
         return $this->redirectToRoute('app_register');

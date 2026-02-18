@@ -43,6 +43,7 @@ final class DashboardStatsService
         $profil = $user->getProfilUtilisateur();
         $targetKcal = $profil ? $this->calorieCalculator->getTargetKcal($profil) : 2000;
 
+        // Récupérer les repas de la période et filtrer par type de repas
         $mealsPeriod = $repasRepository->findByUserAndPeriod($user, $start, $end);
         $mealsPeriod = $this->mealStatsService->filterByMealType($mealsPeriod, $mealType);
         $consumedPeriod = $this->mealStatsService->sumCalories($mealsPeriod);

@@ -90,12 +90,12 @@
 															</div>
 														</div>
 													</td>
-													<td>{{ meal.typeRepas }}</td>
-													<td>{{ meal.dateRepas|date('d/m H:i') }}</td>
-													<td>
+													<td data-label="Type">{{ meal.typeRepas }}</td>
+													<td data-label="Date">{{ meal.dateRepas|date('d/m H:i') }}</td>
+													<td class="table-cell--actions" data-label="Actions">
 														<div class="table-actions">
 															<a class="btn btn--ghost" href="{{ path('repas_edit', { id: meal.id }) }}" aria-label="Modifier">✏️</a>
-															<form method="post" action="{{ path('repas_delete', { id: meal.id }) }}" onsubmit="return confirm('Supprimer ce repas ?');">
+																<form method="post" action="{{ path('repas_delete', { id: meal.id }) }}" onsubmit="return confirm('Supprimer ce repas ?');" novalidate>
 																<input type="hidden" name="_token" value="{{ csrf_token('delete_repas_' ~ meal.id) }}">
 																<button class="btn btn--ghost" type="submit" aria-label="Supprimer">🗑️</button>
 															</form>
@@ -111,7 +111,7 @@
 					{% endif %}
 				</div>
 			</div>
-
+			
 			<div class="grid grid--cards">
 				<article class="card">
 					<h2 class="card-title card-title--sm">Top repas activité</h2>

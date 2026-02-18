@@ -4,30 +4,36 @@
 {% block content %}
 	<div class="page-section">
 		<section class="page-panel">
-			<header class="panel-header--split">
-				<div>
-					<h1 class="panel-title">Modifier un repas</h1>
-					<p class="panel-subtitle">Mettez à jour la date, le type et la note.</p>
-				</div>
-				<a class="btn btn--ghost" href="{{ path('repas') }}">Retour</a>
-			</header>
+				<header class="panel-header--split">
+					<div>
+						<h1 class="panel-title">Modifier un repas</h1>
+						<p class="panel-subtitle">Mettez à jour la date, le type et la note.</p>
+					</div>
+					<a class="btn btn--ghost" href="{{ path('repas') }}">Retour</a>
+				</header>
 
-			<form method="post" class="form-section">
+						<form method="post" class="form-section" novalidate>
 				<section class="form-card">
 					<h2 class="form-title">Infos générales</h2>
 					<div class="grid grid--form">
 						<div class="form-field">
 							<label for="meal-date" class="form-label">Date / heure</label>
-							<input id="meal-date" name="dateRepas" type="datetime-local" class="form-input" value="{{ repas.dateRepas ? repas.dateRepas|date('Y-m-d\\TH:i') : '' }}">
+							<input id="meal-date" name="dateRepas" type="datetime-local" class="form-input" value="{{ repas.dateRepas ? repas.dateRepas|date('Y-m-d\\TH:i') : '' }}" required>
+							{% if fieldErrors is defined and fieldErrors.dateRepas is defined %}
+								<p class="form-helper form-helper--error">{{ fieldErrors.dateRepas|first }}</p>
+							{% endif %}
 						</div>
 						<div class="form-field">
 							<label for="meal-type" class="form-label">Type de repas</label>
-							<select id="meal-type" name="typeRepas" class="form-select">
+							<select id="meal-type" name="typeRepas" class="form-select" required>
 								<option value="petit_dej" {% if repas.typeRepas == 'petit_dej' %} selected {% endif %}>Petit-dej</option>
 								<option value="dejeuner" {% if repas.typeRepas == 'dejeuner' %} selected {% endif %}>Déjeuner</option>
 								<option value="diner" {% if repas.typeRepas == 'diner' %} selected {% endif %}>Dîner</option>
 								<option value="collation" {% if repas.typeRepas == 'collation' %} selected {% endif %}>Collation</option>
 							</select>
+							{% if fieldErrors is defined and fieldErrors.typeRepas is defined %}
+								<p class="form-helper form-helper--error">{{ fieldErrors.typeRepas|first }}</p>
+							{% endif %}
 						</div>
 						<div class="form-field">
 							<label for="meal-note" class="form-label">Note (optionnel)</label>
@@ -36,9 +42,12 @@
 					</div>
 				</section>
 
-				<section class="form-card">
-					<h2 class="form-title">Recettes sélectionnées</h2>
-					{% if repas.elementsRepas is not empty %}
+					<section class="form-card">
+						<h2 class="form-title">Recettes sélectionnées</h2>
+						{% if fieldErrors is defined and fieldErrors.elements is defined %}
+							<p class="form-helper form-helper--error form-helper--spaced">{{ fieldErrors.elements|first }}</p>
+						{% endif %}
+						{% if repas.elementsRepas is not empty %}
 						<div class="stack">
 							{% for element in repas.elementsRepas %}
 								<div class="list-row">
@@ -57,17 +66,25 @@
 					{% endif %}
 				</section>
 
-				<section class="form-summary">
-					<div>
-						<p class="form-summary__label">Total calories</p>
-						<h2 class="form-summary__value">{{ repas.totalCalories }}
-							kcal</h2>
-					</div>
-					<div class="form-actions">
-						<input type="hidden" name="_token" value="{{ csrf_token('edit_repas_' ~ repas.id) }}">
+					<section class="form-summary">
+						<div>
+							<p class="form-summary__label">Total calories</p>
+							<h2 class="form-summary__value">{{ repas.totalCalories }}
+								kcal</h2>
+							{% if fieldErrors is defined and fieldErrors.totalCalories is defined %}
+								<p class="form-helper form-helper--error form-helper--spaced">{{ fieldErrors.totalCalories|first }}</p>
+							{% endif %}
+							{% if fieldErrors is defined and fieldErrors.global is defined %}
+								<p class="form-helper form-helper--error form-helper--spaced">{{ fieldErrors.global|first }}</p>
+							{% endif %}
+						</div>
+
+						<div class="form-actions">
+							<input type="hidden" name="_token" value="{{ csrf_token('edit_repas_' ~ repas.id) }}">
 						<button class="btn btn--primary" type="submit">Enregistrer</button>
 						<a class="btn btn--ghost" href="{{ path('repas') }}">Annuler</a>
 					</div>
+					
 				</section>
 			</form>
 		</section>

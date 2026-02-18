@@ -16,9 +16,7 @@
             <div class="flash flash--error" role="alert">{{ flash_error }}</div>
         {% endfor %}
 
-        {{ form_errors(registrationForm) }}
-
-        {{ form_start(registrationForm, {'attr': {'class': 'form-section'}}) }}
+        {{ form_start(registrationForm, {'attr': {'class': 'form-section', 'novalidate': 'novalidate'}}) }}
             <section class="form-card">
                 <h2 class="form-title">Informations de compte</h2>
                 <div class="stack">

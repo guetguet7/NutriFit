@@ -82,7 +82,7 @@ class ProfilUtilisateur
         return $this->sexe;
     }
 
-    public function setSexe(string $sexe): static
+    public function setSexe(?string $sexe): static
     {
         $this->sexe = $sexe;
 
@@ -94,7 +94,7 @@ class ProfilUtilisateur
         return $this->age;
     }
 
-    public function setAge(int $age): static
+    public function setAge(?int $age): static
     {
         $this->age = $age;
 
@@ -106,7 +106,7 @@ class ProfilUtilisateur
         return $this->tailleCm;
     }
 
-    public function setTailleCm(int $tailleCm): static
+    public function setTailleCm(?int $tailleCm): static
     {
         $this->tailleCm = $tailleCm;
 
@@ -118,7 +118,7 @@ class ProfilUtilisateur
         return $this->poidsKg;
     }
 
-    public function setPoidsKg(string $poidsKg): static
+    public function setPoidsKg(?string $poidsKg): static
     {
         $this->poidsKg = $poidsKg;
 
@@ -130,7 +130,7 @@ class ProfilUtilisateur
         return $this->niveauActivite;
     }
 
-    public function setNiveauActivite(string $niveauActivite): static
+    public function setNiveauActivite(?string $niveauActivite): static
     {
         $this->niveauActivite = $niveauActivite;
 
@@ -142,7 +142,7 @@ class ProfilUtilisateur
         return $this->objectifType;
     }
 
-    public function setObjectifType(string $objectifType): static
+    public function setObjectifType(?string $objectifType): static
     {
         $this->objectifType = $objectifType;
 

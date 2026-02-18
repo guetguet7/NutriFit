@@ -1,122 +1,141 @@
 {% extends 'layout.html.twig' %}
-{% block title %}Dashboard - NutriFit{% endblock %}
+{% block title %}Dashboard - NutriFit
+{% endblock %}
 
 {% block content %}
-<div class="page-section">
-  <section class="page-panel">
-    <header class="panel-header">
-      <div>
-        <h1 class="panel-title">Tableau de bord</h1>
-        <p class="panel-subtitle">
-          Objectif : <strong>{{ targetKcal }}</strong> kcal / jour
-        </p>
-        <div class="panel-actions">
-          <a class="btn btn--primary" href="{{ path('repas_new') }}">Ajouter un repas</a>
-          <a class="btn btn--ghost" href="{{ path('activite_new') }}">Ajouter une activité</a>
-        </div>
-      </div>
-      <div class="panel-illustration">
-        <div class="panel-illustration__text">
-          <img src="{{ asset('img/illustration_dashboard.webp') }}" alt="Illustration salade ">
-        </div>
-      </div>
-    </header>
+	<div class="page-section">
+		<section class="page-panel">
+			<header class="panel-header">
+				<div>
+					<h1 class="panel-title">Tableau de bord</h1>
+					<p class="panel-subtitle">
+						Objectif :
+						<strong>{{ targetKcal }}</strong>
+						kcal / jour
+					</p>
+					<div class="panel-actions">
+						<a class="btn btn--primary" href="{{ path('repas_new') }}">Ajouter un repas</a>
+						<a class="btn btn--ghost" href="{{ path('activite_new') }}">Ajouter une activité</a>
+					</div>
+				</div>
+				<div class="panel-illustration">
+					<div class="panel-illustration__text">
+						<img src="{{ asset('img/illustration_dashboard.webp') }}" alt="Illustration salade ">
+					</div>
+				</div>
+			</header>
 
-    <div class="grid grid--stats">
-      <article class="card card--compact">
-        <p class="stat-label">Consommées ({{ periodLabel }}{% if mealTypeLabel %} • {{ mealTypeLabel }}{% endif %})</p>
-        <h2 class="stat-value">{{ consumedPeriod }} kcal</h2>
-      </article>
-      <article class="card card--compact">
-        <p class="stat-label">Brûlées ({{ periodLabel }})</p>
-        <h2 class="stat-value">{{ burnedPeriod }} kcal</h2>
-      </article>
-      <article class="card card--compact">
-        <p class="stat-label">Reste</p>
-        <h2 class="stat-value">
-          {% if remaining >= 0 %}
-            {{ remaining }} kcal
-          {% else %}
-            +{{ remaining|abs }} kcal
-          {% endif %}
-        </h2>
-      </article>
-      <article class="card card--compact">
-        <p class="stat-label">Progression</p>
-        <progress class="progress-bar" value="{{ progress }}" max="100"></progress>
-        <p class="stat-meta">Net {{ netPeriod }} kcal</p>
-      </article>
-    </div>
+			<div class="grid grid--stats">
+				<article class="card card--compact">
+					<p class="stat-label">Consommées ({{ periodLabel }}
+						{% if mealTypeLabel %}
+							•
+							{{ mealTypeLabel }}
+						{% endif %})</p>
+					<h2 class="stat-value">{{ consumedPeriod }}
+						kcal</h2>
+				</article>
+				<article class="card card--compact">
+					<p class="stat-label">Brûlées ({{ periodLabel }})</p>
+					<h2 class="stat-value">{{ burnedPeriod }}
+						kcal</h2>
+				</article>
+				<article class="card card--compact">
+					<p class="stat-label">Reste</p>
+					<h2 class="stat-value">
+						{% if remaining >= 0 %}
+							{{ remaining }}
+							kcal
+						{% else %}
+							+{{ remaining|abs }}
+							kcal
+						{% endif %}
+					</h2>
+				</article>
+				<article class="card card--compact">
+					<p class="stat-label">Progression</p>
+					<progress class="progress-bar" value="{{ progress }}" max="100"></progress>
+				<p class="stat-meta">Net
+					{{ netPeriod }}
+					kcal</p>
+			</article>
+		</div>
 
-    <div class="card card--list section-block">
-      <div class="chip-row">
-        <a class="chip {{ period == 'day' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: 'day', mealType: mealType }) }}">Auj.</a>
-        <a class="chip {{ period == 'week' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: 'week', mealType: mealType }) }}">Semaine</a>
-        <a class="chip {{ period == 'month' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: 'month', mealType: mealType }) }}">Mois</a>
-        <a class="chip {{ period == 'all' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: 'all', mealType: mealType }) }}">Tous</a>
-        <a class="chip {{ mealType == 'petit_dej' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: period, mealType: 'petit_dej' }) }}">Petit-dej</a>
-        <a class="chip {{ mealType == 'dejeuner' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: period, mealType: 'dejeuner' }) }}">Déjeuner</a>
-        <a class="chip {{ mealType == 'diner' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: period, mealType: 'diner' }) }}">Dîner</a>
-        <a class="chip {{ mealType == 'collation' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: period, mealType: 'collation' }) }}">Collation</a>
-      </div>
+		<div class="card card--list section-block">
+			<div class="chip-row">
+				<a class="chip {{ period == 'day' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: 'day', mealType: mealType }) }}">Auj.</a>
+				<a class="chip {{ period == 'week' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: 'week', mealType: mealType }) }}">Semaine</a>
+				<a class="chip {{ period == 'month' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: 'month', mealType: mealType }) }}">Mois</a>
+				<a class="chip {{ period == 'all' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: 'all', mealType: mealType }) }}">Tous</a>
+				<a class="chip {{ mealType == 'petit_dej' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: period, mealType: 'petit_dej' }) }}">Petit-dej</a>
+				<a class="chip {{ mealType == 'dejeuner' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: period, mealType: 'dejeuner' }) }}">Déjeuner</a>
+				<a class="chip {{ mealType == 'diner' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: period, mealType: 'diner' }) }}">Dîner</a>
+				<a class="chip {{ mealType == 'collation' ? 'chip--active' : '' }}" href="{{ path('dashboard_show', { period: period, mealType: 'collation' }) }}">Collation</a>
+			</div>
 
-      <div class="stack stack--sm section-block--sm">
-        {% if lastMeals is empty %}
-          <p class="empty-state">Aucun repas enregistré.</p>
-        {% else %}
-          {% for m in lastMeals %}
-            <div class="list-row">
-              <div class="list-row__left">
-                <div class="list-row__avatar">
-                  {{ m.typeRepas|slice(0,1)|upper }}
-                </div>
-                <div>
-                  <p class="list-row__title">{{ m.typeRepas }}</p>
-                  <small class="list-row__meta">({{ m.dateRepas|date('d/m H:i') }})</small>
-                </div>
-              </div>
-              <div class="list-row__right">
-                <strong>{{ m.totalCalories }} kcal</strong>
-              </div>
-            </div>
-          {% endfor %}
-        {% endif %}
-      </div>
-    </div>
+			<div class="stack stack--sm section-block--sm">
+				{% if lastMeals is empty %}
+					<p class="empty-state">Aucun repas enregistré.</p>
+				{% else %}
+					{% for m in lastMeals %}
+						<div class="list-row">
+							<div class="list-row__left">
+								<div class="list-row__avatar">
+									{{ m.typeRepas|slice(0,1)|upper }}
+								</div>
+								<div>
+									<p class="list-row__title">{{ m.typeRepas }}</p>
+									<small class="list-row__meta">({{ m.dateRepas|date('d/m H:i') }})</small>
+								</div>
+							</div>
+							<div class="list-row__right">
+								<strong>{{ m.totalCalories }}
+									kcal</strong>
+							</div>
+						</div>
+					{% endfor %}
+				{% endif %}
+			</div>
+		</div>
 
-    <div class="grid grid--cards">
-      <article class="card">
-        <h3 class="card-title card-title--sm">Derniers repas</h3>
-        {% if lastMeals is empty %}
-          <p class="empty-state">Aucun repas enregistré.</p>
-        {% else %}
-          <ul class="compact-list">
-            {% for m in lastMeals %}
-              <li>
-                {{ m.typeRepas }} — {{ m.totalCalories }} kcal
-                <small>({{ m.dateRepas|date('d/m H:i') }})</small>
-              </li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      </article>
+		<div class="grid grid--cards">
+			<article class="card">
+				<h3 class="card-title card-title--sm">Derniers repas</h3>
+				{% if lastMeals is empty %}
+					<p class="empty-state">Aucun repas enregistré.</p>
+				{% else %}
+					<ul class="compact-list">
+						{% for m in lastMeals %}
+							<li>
+								{{ m.typeRepas }}
+								—
+								{{ m.totalCalories }}
+								kcal
+								<small>({{ m.dateRepas|date('d/m H:i') }})</small>
+							</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			</article>
 
-      <article class="card">
-        <h3 class="card-title card-title--sm">Dernières activités</h3>
-        {% if lastActivities is empty %}
-          <p class="empty-state">Aucune activité enregistrée.</p>
-        {% else %}
-          <ul class="compact-list">
-            {% for a in lastActivities %}
-              <li>
-                {{ a.type }} — {{ a.caloriesBrulees }} kcal
-                <small>({{ a.dateActivite|date('d/m H:i') }})</small>
-              </li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      </article>
-    </div>
-  </section>
-</div>
-{% endblock %}
+			<article class="card">
+				<h3 class="card-title card-title--sm">Dernières activités</h3>
+				{% if lastActivities is empty %}
+					<p class="empty-state">Aucune activité enregistrée.</p>
+				{% else %}
+					<ul class="compact-list">
+						{% for a in lastActivities %}
+							<li>
+								{{ a.type }}
+								—
+								{{ a.caloriesBrulees }}
+								kcal
+								<small>({{ a.dateActivite|date('d/m H:i') }})</small>
+							</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			</article>
+		</div>
+	</section>
+</div>{% endblock %}

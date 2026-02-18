@@ -27,7 +27,11 @@ final class DashboardController extends AbstractController
         $mealType = $request->query->getString('mealType', '');
         $mealType = in_array($mealType, ['petit_dej', 'dejeuner', 'diner', 'collation'], true) ? $mealType : null;
 
-        $stats = $statsService->build($user, $period, $mealType, $repasRepository, $activiteRepository);
+        $stats = $statsService->build($user, 
+        $period, 
+        $mealType, 
+        $repasRepository, 
+        $activiteRepository);
 
         return $this->render('dashboard/show.html.twig', [
             'targetKcal' => $stats['targetKcal'],

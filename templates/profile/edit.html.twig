@@ -13,7 +13,13 @@
             <a class="btn btn--ghost" href="{{ path('profile') }}">Retour</a>
         </header>
 
-        {{ form_start(form, {'attr': {'class': 'form-section'}}) }}
+        {{ form_start(form, {'attr': {'class': 'form-section', 'novalidate': 'novalidate', 'data-turbo': 'false'}}) }}
+        {% if form.vars.submitted and not form.vars.valid %}
+            <p class="form-helper form-helper--error">Veuillez corriger les champs du formulaire.</p>
+        {% endif %}
+        {% for error in form.vars.errors %}
+            <p class="form-helper form-helper--error">{{ error.message }}</p>
+        {% endfor %}
         <div class="grid grid--cards section-block">
             <article class="card">
                 <h2 class="card-title">Informations personnelles</h2>
